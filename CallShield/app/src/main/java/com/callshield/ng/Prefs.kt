@@ -52,6 +52,16 @@ class Prefs(context: Context) {
         get() = sp.getStringSet(KEY_BLOCK_LIST, emptySet())?.toSet() ?: emptySet()
         set(v) = sp.edit().putStringSet(KEY_BLOCK_LIST, HashSet(v)).apply()
 
+    /**
+     * "Expecting a call": until this time (ms) strangers may ring even when
+     * unknown numbers are blocked. 0 = off. Block list and loan detection still apply.
+     */
+    var expectingUntil: Long
+        get() = sp.getLong(KEY_EXPECTING, 0L)
+        set(v) = sp.edit().putLong(KEY_EXPECTING, v).apply()
+
+    fun isExpecting(now: Long = System.currentTimeMillis()): Boolean = expectingUntil > now
+
     /** Loan-app spam detection: 0 = off, 1 = normal, 2 = strict. */
     var detectionLevel: Int
         get() = sp.getInt(KEY_DETECTION, 1)
@@ -89,6 +99,42 @@ class Prefs(context: Context) {
         allowList = allowList - entry
     }
 
+    fun toBackup(): BackupData = BackupData(
+        enabled = enabled,
+        blockUnknown = blockUnknown,
+        blockHidden = blockHidden,
+        allowCalledBefore = allowCalledBefore,
+        allowRepeatCallers = allowRepeatCallers,
+        silenceInsteadOfReject = silenceInsteadOfReject,
+        notifyOnBlock = notifyOnBlock,
+        askAboutUnknown = askAboutUnknown,
+        detectionLevel = detectionLevel,
+        allowList = allowList,
+        blockList = blockList,
+        detectedSpam = detectedSpam
+    )
+
+    /** Replaces settings and merges lists. Returns how many list entries were new. */
+    fun restore(d: BackupData, callLogFeatures: Boolean): Int {
+        val before = allowList.size + blockList.size + detectedSpam.size
+        enabled = d.enabled
+        blockUnknown = d.blockUnknown
+        blockHidden = d.blockHidden
+        allowCalledBefore = d.allowCalledBefore && callLogFeatures
+        allowRepeatCallers = d.allowRepeatCallers
+        silenceInsteadOfReject = d.silenceInsteadOfReject
+        notifyOnBlock = d.notifyOnBlock
+        askAboutUnknown = d.askAboutUnknown
+        detectionLevel = d.detectionLevel
+        val newBlock = blockList + d.blockList
+        val newSpam = detectedSpam + d.detectedSpam
+        // A number you allow now stays allowed, even if the backup had it blocked
+        allowList = allowList + (d.allowList - newBlock - newSpam)
+        blockList = newBlock - allowList
+        detectedSpam = newSpam - allowList
+        return (allowList.size + blockList.size + detectedSpam.size - before).coerceAtLeast(0)
+    }
+
     fun markSpam(entry: String) {
         if (entry.isEmpty()) return
         detectedSpam = detectedSpam + entry
@@ -108,6 +154,7 @@ class Prefs(context: Context) {
         private const val KEY_DETECTION = "detection_level"
         private const val KEY_ASK_UNKNOWN = "ask_unknown"
         private const val KEY_DETECTED = "detected_spam"
+        private const val KEY_EXPECTING = "expecting_until"
 
         const val REPEAT_WINDOW_MS = 5 * 60 * 1000L
     }

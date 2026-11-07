@@ -113,7 +113,7 @@
     <string name="auto_note">Caught by loan-app detection</string>
 
     <!-- Log -->
-    <string name="log_hint">Tap a number to allow it, block it for good or call back.</string>
+    <string name="log_hint">Tap a number to allow it, block it for good or call back. The latest 300 calls are kept.</string>
     <string name="log_empty">No calls turned away yet.</string>
     <string name="clear_log">Clear</string>
     <string name="clear_title">Clear the log?</string>
@@ -149,4 +149,42 @@
     <string name="not_spam">Not spam</string>
     <string name="toast_spam_hung_up">Call ended. This number is blocked.</string>
     <string name="toast_spam_next_time">Blocked. Allow the Phone permission so CallShield can also hang up.</string>
+
+    <!-- Expecting a call -->
+    <string name="expecting_button">Expecting a call?</string>
+    <string name="expecting_title">Let strangers ring for…</string>
+    <plurals name="expecting_for_hours">
+        <item quantity="one">%1$d hour</item>
+        <item quantity="other">%1$d hours</item>
+    </plurals>
+    <string name="status_expecting">Expecting a call</string>
+    <string name="rule_expecting">Strangers can ring until %1$s.</string>
+    <string name="stop_now">Stop now</string>
+    <string name="expecting_stopped">Strangers are blocked again.</string>
+    <string name="expecting_notif_title">Strangers can ring until %1$s</string>
+    <string name="expecting_notif_text">Your block list and loan-app detection still apply.</string>
+
+    <!-- Backup -->
+    <string name="r_backup">Back up lists and settings</string>
+    <string name="r_backup_sub">Save a file you can restore after reinstalling</string>
+    <string name="r_restore">Restore from a backup</string>
+    <string name="r_restore_sub">Adds the saved numbers to your lists</string>
+    <string name="backup_file_name">callshield-backup.json</string>
+    <string name="backup_saved">Backup saved. Keep it somewhere safe, like Google Drive.</string>
+    <string name="backup_failed">Couldn’t save the backup. Try another folder.</string>
+    <string name="restore_not_backup">That file isn’t a CallShield backup.</string>
+    <plurals name="restore_done">
+        <item quantity="one">Restored. %1$d number added to your lists.</item>
+        <item quantity="other">Restored. %1$d numbers added to your lists.</item>
+    </plurals>
+
+    <!-- Export -->
+    <string name="export_log">Export for a complaint</string>
+    <string name="export_title">Export turned-away calls</string>
+    <string name="export_body">Makes a spreadsheet of every logged call: date, time, number and why it was blocked. You can attach it to a complaint to the FCCPC or your network.</string>
+    <string name="export_share">Share</string>
+    <string name="export_save">Save to phone</string>
+    <string name="export_subject">Calls blocked by CallShield</string>
+    <string name="export_saved">Spreadsheet saved.</string>
+    <string name="export_failed">Couldn’t create the spreadsheet. Try again.</string>
 </resources>

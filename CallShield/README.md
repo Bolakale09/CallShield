@@ -112,6 +112,19 @@ children's school, hospital, family members using a new line) or add them to the
 allow list. Keep *Let repeat callers through* on if you're worried about missing
 an emergency call from a stranger.
 
+## More features
+
+- **Expecting a call?** Tap the button on the home screen to let strangers ring for 1, 2 or
+  3 hours (a delivery, a job interview, a hospital callback). A notification shows the end
+  time and has a **Stop now** button. Your block list and loan-app detection still apply.
+- **Export for a complaint:** on the Turned-away calls screen. Makes a spreadsheet (CSV) with
+  the date, time, number and reason for each logged call, to share or save, for example as
+  evidence in an FCCPC complaint against a loan app.
+- **Back up / restore:** under More. Saves your lists and settings to a file. Restoring merges
+  the lists, so nothing you have now is lost.
+- **TalkBack:** rows read as switches with their on/off state, detection levels as radio
+  buttons, and section titles as headings.
+
 ## Reliability
 
 - Call checks run on a background thread. If they ever take longer than 3.5 seconds, the call

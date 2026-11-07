@@ -44,6 +44,17 @@
             android:exported="false"
             android:parentActivityName=".MainActivity" />
 
+        <!-- Shares exported CSV files with other apps (WhatsApp, Gmail, Drive) -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.files"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
         <receiver
             android:name=".SpamActionReceiver"
             android:exported="false" />

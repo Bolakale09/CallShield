@@ -5,6 +5,9 @@ import android.app.role.RoleManager
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.text.format.DateUtils
 import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
@@ -22,6 +25,42 @@ class MainActivity : AppCompatActivity() {
     private lateinit var prefs: Prefs
     private lateinit var swCalledBefore: MaterialSwitch
     private lateinit var swEnabled: MaterialSwitch
+    private val ticker = Handler(Looper.getMainLooper())
+    private val refreshRunnable = Runnable { refresh() }
+
+    private val saveBackupLauncher =
+        registerForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
+            if (uri == null) return@registerForActivityResult
+            val ok = try {
+                contentResolver.openOutputStream(uri)?.use {
+                    it.write(Backup.toJson(prefs.toBackup(), System.currentTimeMillis()).toByteArray(Charsets.UTF_8))
+                } != null
+            } catch (e: Exception) {
+                false
+            }
+            Toast.makeText(this, if (ok) R.string.backup_saved else R.string.backup_failed, Toast.LENGTH_LONG).show()
+        }
+
+    private val restoreLauncher =
+        registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+            if (uri == null) return@registerForActivityResult
+            val text = try {
+                contentResolver.openInputStream(uri)?.use { String(it.readBytes(), Charsets.UTF_8) }
+            } catch (e: Exception) {
+                null
+            }
+            val data = text?.let { Backup.fromJson(it) }
+            if (data == null) {
+                Toast.makeText(this, R.string.restore_not_backup, Toast.LENGTH_LONG).show()
+                return@registerForActivityResult
+            }
+            val added = prefs.restore(data, BuildConfig.CALL_LOG_FEATURES)
+            syncControls()
+            refresh()
+            Toast.makeText(
+                this, resources.getQuantityString(R.plurals.restore_done, added, added), Toast.LENGTH_LONG
+            ).show()
+        }
 
     private val roleLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -78,6 +117,17 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<View>(R.id.btnHelp).setOnClickListener { showHelp() }
+        findViewById<View>(R.id.btnExpecting).setOnClickListener { onExpectingPressed() }
+        findViewById<View>(R.id.rowBackup).setOnClickListener {
+            saveBackupLauncher.launch(getString(R.string.backup_file_name))
+        }
+        findViewById<View>(R.id.rowRestore).setOnClickListener {
+            restoreLauncher.launch(arrayOf("application/json", "text/plain", "application/octet-stream", "*/*"))
+        }
+        listOf(
+            R.id.rowScan, R.id.rowLog, R.id.rowAllow, R.id.rowBlock,
+            R.id.rowBackup, R.id.rowRestore, R.id.rowHelp
+        ).forEach { A11y.asButton(findViewById(it)) }
         findViewById<View>(R.id.rowHelp).setOnClickListener { showHelp() }
         findViewById<View>(R.id.btnSetup).setOnClickListener { onSetupPressed() }
 
@@ -95,6 +145,7 @@ class MainActivity : AppCompatActivity() {
         // Loan-app detection
         val segments = mapOf(R.id.detOff to 0, R.id.detNormal to 1, R.id.detStrict to 2)
         segments.forEach { (id, level) ->
+            A11y.asRadio(findViewById(id))
             findViewById<View>(id).setOnClickListener {
                 prefs.detectionLevel = level
                 showDetectionLevel()
@@ -142,12 +193,59 @@ class MainActivity : AppCompatActivity() {
         refresh()
     }
 
+    override fun onPause() {
+        super.onPause()
+        ticker.removeCallbacks(refreshRunnable)
+    }
+
+    /** Puts every switch and the detection choice back in line with saved settings (after a restore). */
+    private fun syncControls() {
+        mapOf(
+            R.id.swUnknown to prefs.blockUnknown,
+            R.id.swHidden to prefs.blockHidden,
+            R.id.swRepeat to prefs.allowRepeatCallers,
+            R.id.swAsk to prefs.askAboutUnknown,
+            R.id.swCalledBefore to prefs.allowCalledBefore,
+            R.id.swSilence to prefs.silenceInsteadOfReject,
+            R.id.swNotify to prefs.notifyOnBlock,
+            R.id.swEnabled to prefs.enabled
+        ).forEach { (id, value) -> findViewById<MaterialSwitch>(id).isChecked = value }
+        showDetectionLevel()
+    }
+
+    // ---------- Expecting a call ----------
+
+    private fun onExpectingPressed() {
+        if (prefs.isExpecting()) {
+            prefs.expectingUntil = 0L
+            Notifier.cancelExpecting(this)
+            refresh()
+            return
+        }
+        val hours = intArrayOf(1, 2, 3)
+        val labels = hours.map { resources.getQuantityString(R.plurals.expecting_for_hours, it, it) }
+            .toTypedArray()
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.expecting_title)
+            .setItems(labels) { _, which ->
+                val until = System.currentTimeMillis() + hours[which] * DateUtils.HOUR_IN_MILLIS
+                prefs.expectingUntil = until
+                askForNotifications()
+                Notifier.expecting(this, until)
+                refresh()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
     /** A whole row toggles its switch, like Samsung's own settings. */
     private fun bindSwitchRow(rowId: Int, switchId: Int, initial: Boolean, onChange: (Boolean) -> Unit) {
         val sw = findViewById<MaterialSwitch>(switchId)
         sw.isChecked = initial
         sw.setOnCheckedChangeListener { _, checked -> onChange(checked) }
-        findViewById<View>(rowId).setOnClickListener { sw.toggle() }
+        val row = findViewById<View>(rowId)
+        row.setOnClickListener { sw.toggle() }
+        A11y.asSwitch(row, sw)
     }
 
     private fun showDetectionLevel() {
@@ -309,22 +407,38 @@ class MainActivity : AppCompatActivity() {
         val stats = findViewById<View>(R.id.statsBlock)
 
         dot.background = ContextCompat.getDrawable(this, if (on) R.drawable.bg_dot_on else R.drawable.bg_dot_off)
+        val expecting = on && prefs.blockUnknown && prefs.isExpecting()
         statusLine.setText(
             when {
+                expecting -> R.string.status_expecting
                 on -> R.string.status_guarding
                 ready -> R.string.status_paused
                 else -> R.string.status_not_guarding
             }
         )
 
-        rule.setText(
-            when {
-                !on -> R.string.rule_anyone
-                prefs.blockUnknown -> R.string.rule_contacts_only
-                prefs.detectionLevel > 0 -> R.string.rule_no_loan_apps
-                else -> R.string.rule_block_list_only
-            }
-        )
+        if (expecting) {
+            val until = DateUtils.formatDateTime(this, prefs.expectingUntil, DateUtils.FORMAT_SHOW_TIME)
+            rule.text = getString(R.string.rule_expecting, until)
+        } else {
+            rule.setText(
+                when {
+                    !on -> R.string.rule_anyone
+                    prefs.blockUnknown -> R.string.rule_contacts_only
+                    prefs.detectionLevel > 0 -> R.string.rule_no_loan_apps
+                    else -> R.string.rule_block_list_only
+                }
+            )
+        }
+
+        // "Expecting a call?" only makes sense while strangers are blocked
+        val expectingBtn = findViewById<TextView>(R.id.btnExpecting)
+        expectingBtn.visibility = if (on && prefs.blockUnknown) View.VISIBLE else View.GONE
+        expectingBtn.setText(if (expecting) R.string.stop_now else R.string.expecting_button)
+        ticker.removeCallbacks(refreshRunnable)
+        if (expecting) {
+            ticker.postDelayed(refreshRunnable, prefs.expectingUntil - System.currentTimeMillis() + 500)
+        }
 
         if (on) {
             detail.visibility = View.GONE

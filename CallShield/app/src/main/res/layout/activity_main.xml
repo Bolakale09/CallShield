@@ -72,6 +72,7 @@
 
                 <View
                     android:id="@+id/statusDot"
+                    android:importantForAccessibility="no"
                     android:layout_width="8dp"
                     android:layout_height="8dp"
                     android:background="@drawable/bg_dot_on" />
@@ -112,6 +113,18 @@
                 app:backgroundTint="@color/gate_ink"
                 app:cornerRadius="16dp" />
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnExpecting"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:layout_marginTop="14dp"
+                android:text="@string/expecting_button"
+                android:textColor="@color/gate_ink"
+                android:visibility="gone"
+                app:cornerRadius="14dp"
+                app:strokeColor="@color/gate_rule" />
+
             <LinearLayout
                 android:id="@+id/statsBlock"
                 android:layout_width="match_parent"
@@ -134,7 +147,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="32dp"
-                        android:orientation="vertical">
+                        android:orientation="vertical"
+                        android:screenReaderFocusable="true">
                         <TextView android:id="@+id/statBlocked" android:layout_width="wrap_content"
                             android:layout_height="wrap_content" style="@style/Text.Stat" />
                         <TextView android:id="@+id/statBlockedLabel" android:layout_width="wrap_content"
@@ -144,7 +158,8 @@
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical">
+                        android:orientation="vertical"
+                        android:screenReaderFocusable="true">
                         <TextView android:id="@+id/statSpam" android:layout_width="wrap_content"
                             android:layout_height="wrap_content" style="@style/Text.Stat" />
                         <TextView android:id="@+id/statSpamLabel" android:layout_width="wrap_content"
@@ -158,10 +173,17 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="bottom"
+            android:layout_marginStart="6dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="2dp"
+            android:baselineAligned="false"
+            android:gravity="center_vertical"
+            android:minHeight="48dp"
             android:orientation="horizontal">
 
-            <TextView style="@style/Text.Section" android:text="@string/sec_turned_away" />
+            <TextView
+                style="@style/Text.SectionTitle"
+                android:text="@string/sec_turned_away" />
 
             <Space
                 android:layout_width="0dp"
@@ -170,15 +192,8 @@
 
             <TextView
                 android:id="@+id/btnSeeAll"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="4dp"
-                android:background="?attr/selectableItemBackground"
-                android:fontFamily="sans-serif-medium"
-                android:padding="6dp"
-                android:text="@string/see_all"
-                android:textColor="@color/green"
-                android:textSize="14sp" />
+                style="@style/TextLink"
+                android:text="@string/see_all" />
         </LinearLayout>
 
         <LinearLayout android:id="@+id/recentList" style="@style/Group" />
@@ -336,6 +351,26 @@
                 </LinearLayout>
                 <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/swEnabled" style="@style/RowSwitch" />
+            </LinearLayout>
+            <View style="@style/Divider" />
+            <LinearLayout android:id="@+id/rowBackup" style="@style/Row">
+                <LinearLayout style="@style/RowText">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        style="@style/Text.RowTitle" android:text="@string/r_backup" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp" style="@style/Text.RowSub" android:text="@string/r_backup_sub" />
+                </LinearLayout>
+                <ImageView style="@style/RowChevron" />
+            </LinearLayout>
+            <View style="@style/Divider" />
+            <LinearLayout android:id="@+id/rowRestore" style="@style/Row">
+                <LinearLayout style="@style/RowText">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        style="@style/Text.RowTitle" android:text="@string/r_restore" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp" style="@style/Text.RowSub" android:text="@string/r_restore_sub" />
+                </LinearLayout>
+                <ImageView style="@style/RowChevron" />
             </LinearLayout>
             <View style="@style/Divider" />
             <LinearLayout android:id="@+id/rowHelp" style="@style/Row">

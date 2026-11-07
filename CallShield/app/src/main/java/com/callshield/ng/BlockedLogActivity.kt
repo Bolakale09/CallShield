@@ -4,6 +4,9 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.FileProvider
+import java.io.File
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
@@ -19,8 +22,19 @@ class BlockedLogActivity : AppCompatActivity() {
     private lateinit var adapter: ArrayAdapter<BlockedCall>
     private lateinit var empty: View
     private lateinit var list: ListView
-    private lateinit var clear: TextView
+    private lateinit var actions: View
     private lateinit var prefs: Prefs
+
+    private val saveCsvLauncher =
+        registerForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri ->
+            if (uri == null) return@registerForActivityResult
+            val ok = try {
+                contentResolver.openOutputStream(uri)?.use { it.write(csvBytes()) } != null
+            } catch (e: Exception) {
+                false
+            }
+            Toast.makeText(this, if (ok) R.string.export_saved else R.string.export_failed, Toast.LENGTH_LONG).show()
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,9 +43,9 @@ class BlockedLogActivity : AppCompatActivity() {
 
         findViewById<View>(R.id.headerBack).setOnClickListener { finish() }
         findViewById<TextView>(R.id.headerTitle).setText(R.string.btn_log)
-        clear = findViewById(R.id.headerAction)
-        clear.setText(R.string.clear_log)
-        clear.setOnClickListener { confirmClear() }
+        actions = findViewById(R.id.logActions)
+        findViewById<View>(R.id.btnClear).setOnClickListener { confirmClear() }
+        findViewById<View>(R.id.btnExport).setOnClickListener { chooseExport() }
 
         empty = findViewById(R.id.empty)
         list = findViewById(R.id.list)
@@ -87,6 +101,47 @@ class BlockedLogActivity : AppCompatActivity() {
         reload()
     }
 
+    // ---------- Export (evidence for a complaint) ----------
+
+    private fun csvBytes(): ByteArray {
+        val rows = BlockedCallStore.all(this).map {
+            val r = CallDisplay.reason(this, it.reason)
+            CsvExport.Row(it.time, CallDisplay.number(this, it.number), r.text, r.spam)
+        }
+        // Byte-order mark so Excel opens the file as UTF-8
+        return "\uFEFF".toByteArray(Charsets.UTF_8) + CsvExport.build(rows).toByteArray(Charsets.UTF_8)
+    }
+
+    private fun chooseExport() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.export_title)
+            .setMessage(R.string.export_body)
+            .setPositiveButton(R.string.export_share) { _, _ -> shareCsv() }
+            .setNeutralButton(R.string.export_save) { _, _ ->
+                saveCsvLauncher.launch(CsvExport.fileName(System.currentTimeMillis()))
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
+    private fun shareCsv() {
+        try {
+            val dir = File(cacheDir, "exports").apply { mkdirs() }
+            dir.listFiles()?.forEach { it.delete() }   // keep only the latest export
+            val file = File(dir, CsvExport.fileName(System.currentTimeMillis()))
+            file.writeBytes(csvBytes())
+            val uri = FileProvider.getUriForFile(this, "$packageName.files", file)
+            val send = Intent(Intent.ACTION_SEND)
+                .setType("text/csv")
+                .putExtra(Intent.EXTRA_STREAM, uri)
+                .putExtra(Intent.EXTRA_SUBJECT, getString(R.string.export_subject))
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            startActivity(Intent.createChooser(send, getString(R.string.export_share)))
+        } catch (e: Exception) {
+            Toast.makeText(this, R.string.export_failed, Toast.LENGTH_LONG).show()
+        }
+    }
+
     private fun confirmClear() {
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.clear_title)
@@ -106,6 +161,6 @@ class BlockedLogActivity : AppCompatActivity() {
         adapter.notifyDataSetChanged()
         empty.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
         list.visibility = if (items.isEmpty()) View.GONE else View.VISIBLE
-        clear.visibility = if (items.isEmpty()) View.GONE else View.VISIBLE
+        actions.visibility = if (items.isEmpty()) View.GONE else View.VISIBLE
     }
 }

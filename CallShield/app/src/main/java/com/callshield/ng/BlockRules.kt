@@ -26,7 +26,8 @@ data class Decision(
  *  7. matches a loan-app calling pattern-> block now and remember the number
  *  8. number you called before          -> allow (if enabled)
  *  9. repeat call within 5 minutes      -> allow (if enabled)
- * 10. unknown number                    -> block (if enabled)
+ * 10. "expecting a call" is on          -> allow (for the chosen hours)
+ * 11. unknown number                    -> block (if enabled)
  */
 object BlockRules {
 
@@ -87,6 +88,10 @@ object BlockRules {
             BlockedCallStore.blockedRecently(context, number, Prefs.REPEAT_WINDOW_MS)
         ) {
             return Decision(false, "Called again within 5 minutes", unknown = number)
+        }
+
+        if (prefs.blockUnknown && prefs.isExpecting()) {
+            return Decision(false, "Expecting a call", unknown = number)
         }
 
         return if (prefs.blockUnknown) Decision(true, "Unknown number (not in contacts)", unknown = number)

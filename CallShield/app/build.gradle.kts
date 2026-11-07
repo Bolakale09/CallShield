@@ -17,8 +17,8 @@ android {
         applicationId = "com.callshield.ng"
         minSdk = 29          // Android 10+ (call screening role)
         targetSdk = 35
-        versionCode = 5
-        versionName = "1.4"
+        versionCode = 6
+        versionName = "1.5"
     }
 
     buildFeatures {
@@ -81,4 +81,6 @@ dependencies {
     implementation("com.google.android.material:material:1.12.0")
 
     testImplementation("junit:junit:4.13.2")
+    // Real org.json for unit tests (Android's copy is only a stub off-device)
+    testImplementation("org.json:json:20240303")
 }

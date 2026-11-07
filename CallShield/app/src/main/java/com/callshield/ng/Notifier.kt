@@ -71,6 +71,30 @@ object Notifier {
         post(context, SUMMARY_ID, n)
     }
 
+    private const val EXPECTING_ID = 43
+
+    /** Ongoing reminder while strangers may ring; disappears by itself when the time is up. */
+    fun expecting(context: Context, until: Long) {
+        val remaining = until - System.currentTimeMillis()
+        if (remaining <= 0) return
+        val time = android.text.format.DateUtils.formatDateTime(
+            context, until, android.text.format.DateUtils.FORMAT_SHOW_TIME
+        )
+        val n = base(context, CHANNEL_BLOCKED)
+            .setContentTitle(context.getString(R.string.expecting_notif_title, time))
+            .setContentText(context.getString(R.string.expecting_notif_text))
+            .setOngoing(true)
+            .setAutoCancel(false)
+            .setSilent(true)
+            .setTimeoutAfter(remaining)
+            .addAction(0, context.getString(R.string.stop_now),
+                SpamActionReceiver.stopExpecting(context, EXPECTING_ID))
+            .build()
+        post(context, EXPECTING_ID, n)
+    }
+
+    fun cancelExpecting(context: Context) = cancel(context, EXPECTING_ID)
+
     /** A number was just flagged by the loan-app pattern detector. Offers "Not spam". */
     fun spamDetected(context: Context, shown: String, normalized: String, reason: String) {
         val id = idFor(normalized)

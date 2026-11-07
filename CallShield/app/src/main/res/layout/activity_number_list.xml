@@ -72,7 +72,7 @@
             android:fontFamily="sans-serif-medium"
             android:padding="10dp"
             android:text="@string/paste_list"
-            android:textColor="@color/green"
+            android:textColor="@color/green_text"
             android:textSize="14sp" />
 
         <TextView
@@ -83,7 +83,7 @@
             android:fontFamily="sans-serif-medium"
             android:padding="10dp"
             android:text="@string/share_list"
-            android:textColor="@color/green"
+            android:textColor="@color/green_text"
             android:textSize="14sp" />
     </LinearLayout>
 

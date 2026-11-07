@@ -67,15 +67,34 @@
         <item name="android:textColor">@color/gate_muted</item>
     </style>
 
-    <style name="Text.Section" parent="">
+    <!-- Section title with no margins (used inside a header row) -->
+    <style name="Text.SectionTitle" parent="">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginTop">28dp</item>
-        <item name="android:layout_marginBottom">10dp</item>
-        <item name="android:layout_marginStart">6dp</item>
         <item name="android:fontFamily">@font/bricolage_semibold</item>
         <item name="android:textSize">19sp</item>
         <item name="android:textColor">@color/ink</item>
+        <item name="android:accessibilityHeading">true</item>
+    </style>
+
+    <style name="Text.Section" parent="Text.SectionTitle">
+        <item name="android:layout_marginTop">28dp</item>
+        <item name="android:layout_marginBottom">10dp</item>
+        <item name="android:layout_marginStart">6dp</item>
+    </style>
+
+    <!-- Green text button (See all, Paste a list, Export…) -->
+    <style name="TextLink" parent="">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingStart">10dp</item>
+        <item name="android:paddingEnd">10dp</item>
+        <item name="android:background">?attr/selectableItemBackground</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textColor">@color/green_text</item>
+        <item name="android:textSize">14sp</item>
     </style>
 
     <style name="Text.RowTitle" parent="">
@@ -140,6 +159,8 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:clickable">false</item>
         <item name="android:focusable">false</item>
+        <!-- The whole row is announced as the switch (see A11y.asSwitch) -->
+        <item name="android:importantForAccessibility">no</item>
     </style>
 
     <style name="RowCount" parent="">

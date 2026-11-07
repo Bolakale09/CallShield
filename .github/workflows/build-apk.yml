@@ -21,39 +21,49 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
-      - name: Run spam-detector tests
-        run: |
-          chmod +x gradlew
-          ./gradlew --no-daemon testFullDebugUnitTest
-
+      # Every APK must be signed with YOUR key. Without it each build would get a
+      # throwaway key and Android would refuse to install it as an update.
       - name: Prepare your signing key
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         run: |
-          if [ -n "$KEYSTORE_BASE64" ]; then
-            echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/callshield.jks"
-            echo "CALLSHIELD_KEYSTORE_FILE=$RUNNER_TEMP/callshield.jks" >> "$GITHUB_ENV"
-            echo "Signing with your own key"
-          else
-            echo "::warning::KEYSTORE_BASE64 secret not set - using the shared debug key"
+          if [ -z "$KEYSTORE_BASE64" ] || [ -z "$KEYSTORE_PASSWORD" ]; then
+            echo "::error::Signing key missing. Add the KEYSTORE_BASE64 and KEYSTORE_PASSWORD secrets (Settings > Secrets and variables > Actions) using CallShield-signing-secrets.txt, then run this build again."
+            exit 1
           fi
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/callshield.jks"
+          echo "CALLSHIELD_KEYSTORE_FILE=$RUNNER_TEMP/callshield.jks" >> "$GITHUB_ENV"
+
+      - name: Run tests
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon testFullDebugUnitTest
 
       - name: Build APKs (full + lite)
         env:
           CALLSHIELD_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         run: ./gradlew --no-daemon assembleRelease
 
-      - name: Check the APKs have no internet permission
+      - name: Check signature and offline-only permissions
         run: |
-          AAPT2=$(ls -d $ANDROID_HOME/build-tools/*/ | sort -V | tail -1)aapt2
+          TOOLS=$(ls -d $ANDROID_HOME/build-tools/*/ | sort -V | tail -1)
+          EXPECTED=$(tr -d ' \n\r' < signing-cert-sha256.txt)
           for APK in app/build/outputs/apk/*/release/*.apk; do
             echo "== $APK"
-            "$AAPT2" dump permissions "$APK" | tee perms.txt
+            ACTUAL=$("${TOOLS}apksigner" verify --print-certs "$APK" | grep -m1 "SHA-256 digest" | awk '{print $NF}')
+            if [ "$ACTUAL" != "$EXPECTED" ]; then
+              echo "::error::$APK is signed with the wrong key ($ACTUAL). Check the KEYSTORE_BASE64 / KEYSTORE_PASSWORD secrets."
+              exit 1
+            fi
+            echo "Signed with your key"
+            "${TOOLS}aapt2" dump permissions "$APK" | tee perms.txt
             if grep -qE "INTERNET|NETWORK_STATE|WIFI_STATE" perms.txt; then
-              echo "ERROR: $APK requests network access but must be offline-only"; exit 1
+              echo "::error::$APK requests network access but must be offline-only"
+              exit 1
             fi
           done
-          echo "OK: offline-only APKs"
+          echo "OK: all APKs signed with your key and offline-only"
 
       - name: Upload APKs
         uses: actions/upload-artifact@v4

@@ -1,36 +1,173 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="shield_green">#0B8457</color>
-    <color name="shield_green_dark">#5DD6A0</color>
-    <color name="shield_grey">#9E9E9E</color>
-    <color name="launcher_bg">#0B8457</color>
 
-    <style name="Theme.CallShield" parent="Theme.Material3.DayNight">
-        <item name="colorPrimary">@color/shield_green</item>
-        <item name="colorSecondary">@color/shield_green</item>
+    <!-- Shared theme. Colours come from colors.xml / values-night/colors.xml. -->
+    <style name="Base.CallShield" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/green</item>
+        <item name="colorOnPrimary">@color/surface</item>
+        <item name="colorPrimaryContainer">@color/green_soft</item>
+        <item name="colorOnPrimaryContainer">@color/ink</item>
+        <item name="colorSecondary">@color/green</item>
+        <item name="colorOnSecondary">@color/surface</item>
+        <item name="colorSecondaryContainer">@color/green_soft</item>
+        <item name="colorOnSecondaryContainer">@color/ink</item>
+        <item name="colorTertiary">@color/kola</item>
+        <item name="colorError">@color/kola</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/ink</item>
+        <item name="colorOnSurfaceVariant">@color/muted</item>
+        <item name="colorSurfaceVariant">@color/ground</item>
+        <item name="colorSurfaceContainerLowest">@color/surface</item>
+        <item name="colorSurfaceContainerLow">@color/surface</item>
+        <item name="colorSurfaceContainer">@color/surface</item>
+        <item name="colorSurfaceContainerHigh">@color/surface</item>
+        <item name="colorSurfaceContainerHighest">@color/track_off</item>
+        <item name="colorOutline">@color/outline</item>
+        <item name="colorOutlineVariant">@color/line</item>
+        <item name="android:colorBackground">@color/ground</item>
+        <item name="android:windowBackground">@color/ground</item>
+        <item name="android:statusBarColor">@color/ground</item>
+        <item name="android:navigationBarColor">@color/ground</item>
     </style>
 
-    <style name="SectionHeader">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginTop">24dp</item>
-        <item name="android:layout_marginBottom">4dp</item>
-        <item name="android:textAppearance">?attr/textAppearanceTitleMedium</item>
-        <item name="android:textColor">?attr/colorPrimary</item>
+    <style name="Theme.CallShield" parent="Base.CallShield">
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
     </style>
 
-    <style name="RuleSwitch">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:minHeight">48dp</item>
-        <item name="android:textAppearance">?attr/textAppearanceBodyLarge</item>
+    <!-- ===== Type ===== -->
+    <style name="Text.Wordmark" parent="">
+        <item name="android:fontFamily">@font/bricolage_bold</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:textColor">@color/ink</item>
     </style>
 
-    <style name="RuleHint">
+    <style name="Text.ScreenTitle" parent="">
+        <item name="android:fontFamily">@font/bricolage_semibold</item>
+        <item name="android:textSize">21sp</item>
+        <item name="android:textColor">@color/ink</item>
+    </style>
+
+    <style name="Text.Hero" parent="">
+        <item name="android:fontFamily">@font/bricolage_display</item>
+        <item name="android:textSize">34sp</item>
+        <item name="android:lineHeight">38sp</item>
+        <item name="android:letterSpacing">-0.015</item>
+        <item name="android:textColor">@color/gate_ink</item>
+    </style>
+
+    <style name="Text.Stat" parent="">
+        <item name="android:fontFamily">@font/bricolage_semibold</item>
+        <item name="android:textSize">28sp</item>
+        <item name="android:textColor">@color/gate_ink</item>
+    </style>
+
+    <style name="Text.GateSmall" parent="">
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">@color/gate_muted</item>
+    </style>
+
+    <style name="Text.Section" parent="">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">28dp</item>
+        <item name="android:layout_marginBottom">10dp</item>
+        <item name="android:layout_marginStart">6dp</item>
+        <item name="android:fontFamily">@font/bricolage_semibold</item>
+        <item name="android:textSize">19sp</item>
+        <item name="android:textColor">@color/ink</item>
+    </style>
+
+    <style name="Text.RowTitle" parent="">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/ink</item>
+    </style>
+
+    <style name="Text.RowSub" parent="">
+        <item name="android:textSize">14sp</item>
+        <item name="android:lineSpacingExtra">2sp</item>
+        <item name="android:textColor">@color/muted</item>
+    </style>
+
+    <style name="Text.Note" parent="Text.RowSub">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginBottom">8dp</item>
-        <item name="android:textAppearance">?attr/textAppearanceBodySmall</item>
-        <item name="android:alpha">0.75</item>
+        <item name="android:layout_marginStart">6dp</item>
+        <item name="android:layout_marginEnd">6dp</item>
+        <item name="android:layout_marginTop">10dp</item>
+    </style>
+
+    <!-- ===== Grouped list (Samsung-style rounded groups) ===== -->
+    <style name="Group" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:background">@drawable/bg_group</item>
+    </style>
+
+    <style name="Row" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">64dp</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingStart">18dp</item>
+        <item name="android:paddingEnd">14dp</item>
+        <item name="android:paddingTop">12dp</item>
+        <item name="android:paddingBottom">12dp</item>
+        <item name="android:background">?attr/selectableItemBackground</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+    <style name="RowText" parent="">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_marginEnd">12dp</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="Divider" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:layout_marginStart">18dp</item>
+        <item name="android:background">@color/line</item>
+    </style>
+
+    <style name="RowSwitch" parent="">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:clickable">false</item>
+        <item name="android:focusable">false</item>
+    </style>
+
+    <style name="RowCount" parent="">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginEnd">4dp</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/muted</item>
+        <item name="android:fontFeatureSettings">tnum</item>
+    </style>
+
+    <style name="RowChevron" parent="">
+        <item name="android:layout_width">20dp</item>
+        <item name="android:layout_height">20dp</item>
+        <item name="android:src">@drawable/ic_chevron</item>
+        <item name="android:contentDescription">@null</item>
+    </style>
+
+    <style name="Segment" parent="">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">44dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/seg_text</item>
+        <item name="android:background">@drawable/bg_segment</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 </resources>

@@ -39,14 +39,36 @@ object Notifier {
 
     fun idFor(number: String): Int = 1000 + (number.hashCode() and 0x7FFFFFF)
 
-    /** Plain "call blocked" notice. */
-    fun blocked(context: Context, number: String, reason: String) {
+    private const val SUMMARY_ID = 42
+
+    /**
+     * One notification for all turned-away calls, updated in place:
+     * "5 calls turned away today" with the latest few listed. It never buzzes.
+     */
+    fun blockedSummary(context: Context, todayCount: Int) {
+        val recent = BlockedCallStore.today(context, BlockStats.startOfToday()).take(5)
+        val lines = recent.map {
+            context.getString(
+                R.string.notif_summary_line,
+                CallDisplay.number(context, it.number),
+                CallDisplay.reason(context, it.reason).text
+            )
+        }
+        val title = context.resources.getQuantityString(R.plurals.notif_summary_title, todayCount, todayCount)
+        val style = NotificationCompat.InboxStyle().setBigContentTitle(title)
+        lines.forEach { style.addLine(it) }
+        if (todayCount > lines.size) {
+            style.setSummaryText(context.getString(R.string.notif_summary_more, todayCount - lines.size))
+        }
         val n = base(context, CHANNEL_BLOCKED)
-            .setContentTitle(context.getString(R.string.notif_title, number))
-            .setContentText(reason)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(reason))
+            .setContentTitle(title)
+            .setContentText(lines.firstOrNull() ?: "")
+            .setStyle(style)
+            .setNumber(todayCount)
+            .setOnlyAlertOnce(true)
+            .setSilent(true)
             .build()
-        post(context, (System.currentTimeMillis() % 100000).toInt(), n)
+        post(context, SUMMARY_ID, n)
     }
 
     /** A number was just flagged by the loan-app pattern detector. Offers "Not spam". */

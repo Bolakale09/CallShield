@@ -2,35 +2,40 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp">
+
+    <include layout="@layout/view_header" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/log_hint"
-        android:textAppearance="?attr/textAppearanceBodyMedium" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnClear"
-        style="@style/Widget.Material3.Button.TextButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:text="@string/clear_log" />
+        android:layout_marginStart="6dp"
+        android:layout_marginEnd="6dp"
+        android:layout_marginBottom="14dp"
+        style="@style/Text.RowSub"
+        android:text="@string/log_hint" />
 
     <TextView
         android:id="@+id/empty"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:background="@drawable/bg_group"
         android:gravity="center"
+        android:lineSpacingExtra="3sp"
+        android:padding="28dp"
         android:text="@string/log_empty"
-        android:textAppearance="?attr/textAppearanceBodyMedium" />
+        android:textColor="@color/muted"
+        android:textSize="15sp" />
 
     <ListView
         android:id="@+id/list"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/bg_group"
+        android:divider="@drawable/divider_inset"
+        android:dividerHeight="1dp" />
 </LinearLayout>

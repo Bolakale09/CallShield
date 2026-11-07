@@ -61,7 +61,7 @@ object SpamScorer {
         val days = week.map { dayIndex(it, tz) }.toSet().size
         if (days >= 3 || (days >= 2 && week.size >= 3)) {
             score += 3
-            reasons += "called on $days different days this week"
+            reasons += "called on $days days this week"
         }
 
         // 2. Call volume from this number in the last 24 hours (this call included).
@@ -100,7 +100,7 @@ object SpamScorer {
         val neighbour = knownSpam.firstOrNull { !it.endsWith("*") && NumberFormat.sameNumberBlock(number, it) }
         if (neighbour != null) {
             score += 3
-            reasons += "same number range as spam ${NumberFormat.blockLabel(neighbour)}"
+            reasons += "next to known spam ${NumberFormat.blockLabel(neighbour)}"
         }
 
         // 6. Phone call log: keeps calling, you never call back

@@ -1,101 +1,152 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">CallShield</string>
+    <string name="wordmark">CallShield</string>
+    <string name="edition_lite">Lite</string>
 
+    <!-- The gate (home hero) -->
+    <string name="status_guarding">Guarding your line</string>
+    <string name="status_paused">Paused</string>
+    <string name="status_not_guarding">Not set up yet</string>
+    <string name="rule_contacts_only">Only your contacts can ring you.</string>
+    <string name="rule_no_loan_apps">Strangers can ring. Loan-app callers can’t.</string>
+    <string name="rule_block_list_only">Only numbers you block are stopped.</string>
+    <string name="rule_anyone">Anyone can ring you right now.</string>
+    <string name="problem_contacts">Allow Contacts so your saved numbers keep ringing.</string>
+    <string name="problem_role">Make CallShield your caller ID &amp; spam app.</string>
+    <string name="problem_paused">You paused protection.</string>
     <string name="turn_on">Turn on protection</string>
-    <string name="status_on">Protection is ON</string>
-    <string name="status_on_detail">Unknown numbers and loan-app spam patterns are blocked automatically. Your contacts always ring. Works fully offline: no internet or data needed.</string>
-    <string name="status_off">Protection is OFF</string>
-    <string name="problem_contacts">Allow access to Contacts so your saved numbers can still ring.</string>
-    <string name="problem_role">Set CallShield as your \"Caller ID &amp; spam app\".</string>
-    <string name="problem_disabled">Blocking is switched off below.</string>
-    <string name="blocked_count">Calls blocked so far: %1$d</string>
+    <string name="resume">Resume protection</string>
+    <plurals name="calls_turned_away">
+        <item quantity="one">call turned away</item>
+        <item quantity="other">calls turned away</item>
+    </plurals>
+    <plurals name="spam_caught">
+        <item quantity="one">loan-spam number caught</item>
+        <item quantity="other">loan-spam numbers caught</item>
+    </plurals>
 
-    <string name="section_rules">Blocking rules</string>
-    <string name="sw_enabled">Blocking switched on</string>
-    <string name="sw_unknown">Block numbers not in my contacts</string>
-    <string name="sw_unknown_hint">Stops loan-app, debt-recovery and other spam calls from numbers you never saved.</string>
-    <string name="sw_hidden">Block private / hidden numbers</string>
-    <string name="sw_hidden_hint">Calls showing \"No caller ID\" or \"Private number\".</string>
-    <string name="sw_called">Allow numbers I have called before</string>
-    <string name="sw_called_hint">Lets dispatch riders, your bank or a shop you phoned call you back, even if not saved. Needs call log access.</string>
-    <string name="sw_repeat">Let repeat callers through</string>
-    <string name="sw_repeat_hint">If the same unknown number calls again within 5 minutes, it rings. Useful for emergencies. Turn off if spammers keep redialling.</string>
-    <string name="sw_silence">Silence instead of reject</string>
-    <string name="sw_silence_hint">The phone does not ring, but the caller hears it ringing and the call shows as missed.</string>
-    <string name="sw_notify">Notify me when a call is blocked</string>
+    <!-- Home sections -->
+    <string name="sec_turned_away">Turned away</string>
+    <string name="see_all">See all</string>
+    <string name="recent_empty">No calls turned away yet. They’ll show up here.</string>
+    <string name="sec_who">Who can ring you</string>
+    <string name="r_unknown">Block numbers I haven’t saved</string>
+    <string name="r_unknown_sub">Strangers go straight to your log</string>
+    <string name="r_hidden">Block hidden numbers</string>
+    <string name="r_hidden_sub">“No caller ID” and private calls</string>
+    <string name="r_repeat">Let a second call through</string>
+    <string name="r_repeat_sub">When the same number rings again within 5 minutes</string>
+    <string name="r_ask">Ask me when a stranger rings</string>
+    <string name="r_ask_sub">Adds a “Block as loan spam” button that hangs up and blocks them</string>
 
-    <string name="section_lists">Your lists</string>
-    <string name="btn_log">Blocked calls</string>
-    <string name="btn_allow">Always allow (allow list)</string>
-    <string name="btn_block">Always block (block list)</string>
-
-    <string name="section_samsung">Samsung setup tips</string>
-    <string name="samsung_tips">Works offline: CallShield needs no internet, no data and no account. Everything stays on your phone.\n\n1. Tap \"Turn on protection\", allow Contacts, then tap \"Set as default\" when asked about the Caller ID &amp; spam app.\n\n2. No pop-up? Open Settings › Apps › Choose default apps › Caller ID &amp; spam app and pick CallShield.\n\n3. Samsung\'s own Phone › Settings › Block numbers › \"Block unknown/private numbers\" only stops hidden-ID calls. CallShield also blocks every number you have not saved.\n\n4. Works on both SIMs. No battery settings needed: Android wakes CallShield only when a call comes in.\n\n5. Save important numbers (bank, school, hospital, riders) in Contacts or the allow list so they always ring.\n\n6. WhatsApp and other internet calls are not covered; block those inside WhatsApp (Settings › Privacy › Calls › Silence unknown callers).</string>
-    <string name="btn_default_apps">Open default apps settings</string>
-
-    <string name="manual_title">Set CallShield manually</string>
-    <string name="manual_steps">On Samsung: Settings › Apps › Choose default apps › Caller ID &amp; spam app › CallShield.\n\nOther phones: Settings › Apps › Default apps › Caller ID &amp; spam app.</string>
-    <string name="need_contacts">Contacts access is needed, otherwise CallShield cannot tell your contacts from strangers and will not block anything.</string>
-    <string name="need_call_log">Without call log access this option cannot work.</string>
-
-    <string name="number_hint">Number, or prefix ending in *</string>
-    <string name="add">Add</string>
-    <string name="allow_hint">These numbers always ring, even if not saved in Contacts. Add a prefix with * (e.g. 0201* for a landline area).</string>
-    <string name="block_hint">These numbers are always blocked, even if saved in Contacts. Use * for a prefix, e.g. 0700* blocks every number starting 0700. Numbers next to one on this list (same block of 1000) are also treated as spam.</string>
-    <string name="list_empty">Nothing here yet.</string>
-    <string name="invalid_number">Enter a phone number</string>
-    <string name="remove_question">Remove this from the list?</string>
-    <string name="remove">Remove</string>
-
-    <string name="log_hint">Tap a number to allow it, block it permanently or call it back.</string>
-    <string name="log_empty">No blocked calls yet.</string>
-    <string name="clear_log">Clear list</string>
-    <string name="action_allow">Always allow this number</string>
-    <string name="action_block">Block permanently</string>
-    <string name="action_call">Call back</string>
-    <string name="added_allow">Added to allow list</string>
-    <string name="added_block">Added to block list</string>
-
-    <string name="channel_name">Blocked calls</string>
-    <string name="notif_title">Blocked call from %1$s</string>
-
-    <!-- Loan-app spam pattern detection -->
-    <string name="section_detection">Loan-app spam detection</string>
-    <string name="detection_hint">Watches how unknown numbers call you and blocks the ones that behave like loan-app and debt-recovery call centres: calling on several days, many calls spread over the day, waves of different numbers, numbers next to a known spammer, late-night calls and 020 call-centre lines. Once caught, a number is blocked straight away every time.</string>
+    <string name="section_detection">Loan-app detection</string>
     <string name="det_off">Off</string>
     <string name="det_normal">Normal</string>
     <string name="det_strict">Strict</string>
-    <string name="det_off_hint">Pattern detection is off. Only your other rules apply.</string>
-    <string name="det_normal_hint">Normal: blocks clear collector patterns. A stranger redialling quickly in an emergency still gets through.</string>
-    <string name="det_strict_hint">Strict: for heavy harassment. Also blocks any number that calls 4+ times a day, and every new unknown number during a spam wave.</string>
-    <string name="sw_ask">Ask me about unknown callers that ring</string>
-    <string name="sw_ask_hint">Shows a \"Block as loan spam\" button while an unknown number is ringing. Tapping it hangs up and blocks that number for good.</string>
-    <string name="btn_scan">Scan my call history for spam numbers</string>
-    <string name="spam_count">Loan-spam numbers caught: %1$d</string>
-    <string name="scanning">Scanning the last 30 days of calls…</string>
-    <string name="scan_title">Call history scan</string>
-    <string name="scan_none">No numbers in your recent calls look like loan-app collectors.</string>
-    <string name="scan_found">%1$d numbers look like loan-app spam</string>
+    <string name="det_off_hint">Only your switches and lists decide who’s blocked.</string>
+    <string name="det_normal_hint">Blocks numbers that call like debt collectors: several days in a row, all day long, or in waves of new numbers.</string>
+    <string name="det_strict_hint">Also blocks any number that rings 4 or more times a day, and every new stranger during a spam wave.</string>
+    <string name="btn_scan">Check my recent calls</string>
+    <string name="scan_sub">Find collectors already in your call history</string>
+
+    <string name="sec_lists">Your lists</string>
+    <string name="btn_log">Turned-away calls</string>
+    <string name="btn_allow">Always allow</string>
+    <string name="btn_block">Always block</string>
+
+    <string name="sec_more">More</string>
+    <string name="r_called">Let numbers I’ve called ring</string>
+    <string name="r_called_sub">Riders, your bank, shops you phoned</string>
+    <string name="r_silence">Silence instead of rejecting</string>
+    <string name="r_silence_sub">The caller hears ringing; it shows as a missed call</string>
+    <string name="r_notify">Tell me when calls are blocked</string>
+    <string name="r_notify_sub">One silent notification with today’s count</string>
+    <string name="r_enabled">Protection</string>
+    <string name="r_enabled_sub">Turn off to let every call ring</string>
+    <string name="offline_note">Works offline. Your contacts and calls never leave this phone.</string>
+
+    <!-- Help -->
+    <string name="help_title">Setting up on Samsung</string>
+    <string name="help_body">CallShield must be your caller ID &amp; spam app. If it isn’t, open Settings › Apps › Choose default apps › Caller ID &amp; spam app and pick CallShield.\n\nIt works on both SIMs and needs no battery settings: Android starts it only when a call comes in.\n\nSave numbers you can’t miss (bank, school, hospital) in Contacts or Always allow.\n\nWhatsApp calls aren’t covered. In WhatsApp, turn on Settings › Privacy › Calls › Silence unknown callers.</string>
+    <string name="btn_default_apps">Open default apps</string>
+    <string name="close">Close</string>
+    <string name="cancel">Cancel</string>
+    <string name="back">Back</string>
+    <string name="manual_title">Pick CallShield in settings</string>
+    <string name="manual_steps">Open Settings › Apps › Choose default apps › Caller ID &amp; spam app, then pick CallShield.</string>
+    <string name="need_contacts">CallShield needs Contacts to tell your people from strangers. Without it, nothing is blocked.</string>
+    <string name="need_call_log">This needs call log access.</string>
+
+    <!-- Scan -->
+    <string name="scanning">Checking the last 30 days of calls…</string>
+    <string name="scan_title">Recent calls checked</string>
+    <string name="scan_none">No number in your recent calls looks like a loan-app collector.</string>
+    <plurals name="scan_found">
+        <item quantity="one">%1$d number looks like loan spam</item>
+        <item quantity="other">%1$d numbers look like loan spam</item>
+    </plurals>
     <string name="block_selected">Block selected</string>
-    <string name="scan_blocked">%1$d numbers will be blocked immediately from now on.</string>
+    <plurals name="scan_blocked">
+        <item quantity="one">%1$d number blocked</item>
+        <item quantity="other">%1$d numbers blocked</item>
+    </plurals>
 
-    <string name="paste_list">Paste list</string>
+    <!-- Lists -->
+    <string name="number_hint">Number, or prefix ending in *</string>
+    <string name="add">Add</string>
+    <string name="allow_hint">These numbers always ring, even if they aren’t saved.</string>
+    <string name="block_hint">These never ring, even if saved. 0700* blocks every number starting 0700. Numbers next to one here are treated as suspects.</string>
+    <string name="list_empty">Nothing here yet.</string>
+    <string name="invalid_number">Enter a full number, or a prefix of at least 4 digits</string>
+    <string name="remove_question">Remove this number from the list?</string>
+    <string name="remove">Remove</string>
+    <string name="paste_list">Paste a list</string>
     <string name="share_list">Share list</string>
-    <string name="paste_hint">One number per line, e.g. a spam list from a WhatsApp group</string>
-    <string name="pasted_count">Added %1$d numbers</string>
+    <string name="paste_hint">One number per line</string>
+    <plurals name="pasted_count">
+        <item quantity="one">%1$d number added</item>
+        <item quantity="other">%1$d numbers added</item>
+    </plurals>
     <string name="share_header_allow">My CallShield allow list:</string>
-    <string name="share_header_block">Loan-app / spam numbers (CallShield block list):</string>
-    <string name="auto_suffix">%1$s  · auto-detected</string>
+    <string name="share_header_block">Loan-app and spam numbers (from CallShield):</string>
+    <string name="auto_note">Caught by loan-app detection</string>
 
-    <string name="action_spam">Mark as loan-app spam</string>
-    <string name="added_spam">Marked as spam. It and similar numbers will be blocked.</string>
-    <string name="channel_ask_name">Unknown callers</string>
-    <string name="notif_spam_title">Loan-app spam blocked: %1$s</string>
-    <string name="notif_unknown_title">Unknown caller: %1$s</string>
-    <string name="notif_unknown_text">Is this a loan app or spam?</string>
+    <!-- Log -->
+    <string name="log_hint">Tap a number to allow it, block it for good or call back.</string>
+    <string name="log_empty">No calls turned away yet.</string>
+    <string name="clear_log">Clear</string>
+    <string name="clear_title">Clear the log?</string>
+    <string name="clear_body">This removes the list of turned-away calls. Blocked numbers stay blocked.</string>
+    <string name="action_allow">Always allow</string>
+    <string name="action_spam">Mark as loan spam</string>
+    <string name="action_block">Always block</string>
+    <string name="action_call">Call back</string>
+    <string name="added_allow">Added to Always allow</string>
+    <string name="added_block">Added to Always block</string>
+    <string name="added_spam">Marked as loan spam. Nearby numbers are now suspects too.</string>
+    <string name="tag_loan_spam">Loan spam</string>
+    <string name="private_number">Private number</string>
+    <string name="yesterday">Yesterday</string>
+    <string name="reason_caught_before">Caught before</string>
+    <string name="reason_unknown">Not in your contacts</string>
+    <string name="reason_hidden">Hidden number</string>
+    <string name="reason_block_list">On your block list</string>
+
+    <!-- Notifications -->
+    <string name="channel_name">Blocked calls</string>
+    <string name="channel_ask_name">Strangers ringing</string>
+    <plurals name="notif_summary_title">
+        <item quantity="one">%1$d call turned away today</item>
+        <item quantity="other">%1$d calls turned away today</item>
+    </plurals>
+    <string name="notif_summary_line">%1$s: %2$s</string>
+    <string name="notif_summary_more">and %1$d earlier today</string>
+    <string name="notif_spam_title">Loan spam blocked: %1$s</string>
+    <string name="notif_unknown_title">%1$s is ringing</string>
+    <string name="notif_unknown_text">Not in your contacts. Loan app or spam?</string>
     <string name="block_as_spam">Block as loan spam</string>
     <string name="not_spam">Not spam</string>
-    <string name="toast_spam_hung_up">Call ended. This number is now blocked.</string>
-    <string name="toast_spam_next_time">This number is now blocked. Allow the \"Phone\" permission in CallShield to also hang up instantly.</string>
+    <string name="toast_spam_hung_up">Call ended. This number is blocked.</string>
+    <string name="toast_spam_next_time">Blocked. Allow the Phone permission so CallShield can also hang up.</string>
 </resources>

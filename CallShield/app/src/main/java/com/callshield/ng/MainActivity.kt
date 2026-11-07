@@ -6,33 +6,27 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.view.LayoutInflater
 import android.view.View
-import android.widget.Button
-import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.button.MaterialButtonToggleGroup
+import androidx.core.content.ContextCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.materialswitch.MaterialSwitch
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var prefs: Prefs
-    private lateinit var statusTitle: TextView
-    private lateinit var statusText: TextView
-    private lateinit var statusIcon: ImageView
-    private lateinit var blockedCount: TextView
-    private lateinit var spamCount: TextView
-    private lateinit var detectionLevelHint: TextView
-    private lateinit var btnSetup: Button
     private lateinit var swCalledBefore: MaterialSwitch
+    private lateinit var swEnabled: MaterialSwitch
 
     private val roleLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (!hasScreeningRole()) showManualRoleHelp()
-            refreshStatus()
+            refresh()
         }
 
     private val basePermsLauncher =
@@ -42,7 +36,7 @@ class MainActivity : AppCompatActivity() {
             } else if (!hasScreeningRole()) {
                 requestScreeningRole()
             }
-            refreshStatus()
+            refresh()
         }
 
     private val callLogPermLauncher =
@@ -66,91 +60,103 @@ class MainActivity : AppCompatActivity() {
         prefs = Prefs(this)
         Notifier.ensureChannel(this)
 
-        statusTitle = findViewById(R.id.statusTitle)
-        statusText = findViewById(R.id.statusText)
-        statusIcon = findViewById(R.id.statusIcon)
-        blockedCount = findViewById(R.id.blockedCount)
-        spamCount = findViewById(R.id.spamCount)
-        detectionLevelHint = findViewById(R.id.detectionLevelHint)
-        btnSetup = findViewById(R.id.btnSetup)
         swCalledBefore = findViewById(R.id.swCalledBefore)
+        swEnabled = findViewById(R.id.swEnabled)
 
-        btnSetup.setOnClickListener { startSetup() }
+        // Rounded groups clip their row ripples
+        listOf(R.id.recentList, R.id.groupScan).forEach { findViewById<View>(it).clipToOutline = true }
 
-        // Lite edition has no call-log permission: hide the features that need it
         if (!BuildConfig.CALL_LOG_FEATURES) {
-            swCalledBefore.visibility = View.GONE
-            findViewById<View>(R.id.swCalledBeforeHint).visibility = View.GONE
-            findViewById<View>(R.id.btnScan).visibility = View.GONE
+            findViewById<TextView>(R.id.edition).apply {
+                visibility = View.VISIBLE
+                setText(R.string.edition_lite)
+            }
+            findViewById<View>(R.id.groupScan).visibility = View.GONE
+            findViewById<View>(R.id.rowCalled).visibility = View.GONE
+            findViewById<View>(R.id.divCalled).visibility = View.GONE
             prefs.allowCalledBefore = false
         }
 
-        // Loan-app spam detection strength
-        val group = findViewById<MaterialButtonToggleGroup>(R.id.detectionGroup)
-        group.check(
-            when (prefs.detectionLevel) {
-                0 -> R.id.detOff
-                2 -> R.id.detStrict
-                else -> R.id.detNormal
-            }
-        )
-        group.addOnButtonCheckedListener { _, checkedId, isChecked ->
-            if (!isChecked) return@addOnButtonCheckedListener
-            prefs.detectionLevel = when (checkedId) {
-                R.id.detOff -> 0
-                R.id.detStrict -> 2
-                else -> 1
-            }
-            updateDetectionHint()
-        }
-        updateDetectionHint()
+        findViewById<View>(R.id.btnHelp).setOnClickListener { showHelp() }
+        findViewById<View>(R.id.rowHelp).setOnClickListener { showHelp() }
+        findViewById<View>(R.id.btnSetup).setOnClickListener { onSetupPressed() }
 
-        bindSwitch(R.id.swAsk, prefs.askAboutUnknown) { prefs.askAboutUnknown = it }
-        findViewById<Button>(R.id.btnScan).setOnClickListener {
+        // Who can ring you
+        bindSwitchRow(R.id.rowUnknown, R.id.swUnknown, prefs.blockUnknown) {
+            prefs.blockUnknown = it; refresh()
+        }
+        bindSwitchRow(R.id.rowHidden, R.id.swHidden, prefs.blockHidden) { prefs.blockHidden = it }
+        bindSwitchRow(R.id.rowRepeat, R.id.swRepeat, prefs.allowRepeatCallers) { prefs.allowRepeatCallers = it }
+        bindSwitchRow(R.id.rowAsk, R.id.swAsk, prefs.askAboutUnknown) { checked ->
+            prefs.askAboutUnknown = checked
+            if (checked) askForNotifications()
+        }
+
+        // Loan-app detection
+        val segments = mapOf(R.id.detOff to 0, R.id.detNormal to 1, R.id.detStrict to 2)
+        segments.forEach { (id, level) ->
+            findViewById<View>(id).setOnClickListener {
+                prefs.detectionLevel = level
+                showDetectionLevel()
+                refresh()
+            }
+        }
+        showDetectionLevel()
+        findViewById<View>(R.id.rowScan).setOnClickListener {
             if (PhoneUtils.hasPermission(this, Manifest.permission.READ_CALL_LOG)) scanCallHistory()
             else scanPermLauncher.launch(Manifest.permission.READ_CALL_LOG)
         }
 
-        bindSwitch(R.id.swEnabled, prefs.enabled) { prefs.enabled = it; refreshStatus() }
-        bindSwitch(R.id.swUnknown, prefs.blockUnknown) { prefs.blockUnknown = it }
-        bindSwitch(R.id.swHidden, prefs.blockHidden) { prefs.blockHidden = it }
-        bindSwitch(R.id.swRepeat, prefs.allowRepeatCallers) { prefs.allowRepeatCallers = it }
-        bindSwitch(R.id.swSilence, prefs.silenceInsteadOfReject) { prefs.silenceInsteadOfReject = it }
-        bindSwitch(R.id.swNotify, prefs.notifyOnBlock) { checked ->
-            prefs.notifyOnBlock = checked
-            if (checked && Build.VERSION.SDK_INT >= 33 &&
-                !PhoneUtils.hasPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-            ) {
-                basePermsLauncher.launch(arrayOf(Manifest.permission.POST_NOTIFICATIONS))
-            }
+        // Lists
+        val openLog = View.OnClickListener { startActivity(Intent(this, BlockedLogActivity::class.java)) }
+        findViewById<View>(R.id.btnSeeAll).setOnClickListener(openLog)
+        findViewById<View>(R.id.rowLog).setOnClickListener(openLog)
+        findViewById<View>(R.id.rowAllow).setOnClickListener {
+            startActivity(NumberListActivity.intent(this, NumberListActivity.MODE_ALLOW))
         }
-        bindSwitch(R.id.swCalledBefore, prefs.allowCalledBefore) { checked ->
+        findViewById<View>(R.id.rowBlock).setOnClickListener {
+            startActivity(NumberListActivity.intent(this, NumberListActivity.MODE_BLOCK))
+        }
+
+        // More
+        bindSwitchRow(R.id.rowCalled, R.id.swCalledBefore, prefs.allowCalledBefore) { checked ->
             prefs.allowCalledBefore = checked
             if (checked && !PhoneUtils.hasPermission(this, Manifest.permission.READ_CALL_LOG)) {
                 callLogPermLauncher.launch(Manifest.permission.READ_CALL_LOG)
             }
         }
-
-        findViewById<Button>(R.id.btnLog).setOnClickListener {
-            startActivity(Intent(this, BlockedLogActivity::class.java))
+        bindSwitchRow(R.id.rowSilence, R.id.swSilence, prefs.silenceInsteadOfReject) {
+            prefs.silenceInsteadOfReject = it
         }
-        findViewById<Button>(R.id.btnAllow).setOnClickListener {
-            startActivity(NumberListActivity.intent(this, NumberListActivity.MODE_ALLOW))
+        bindSwitchRow(R.id.rowNotify, R.id.swNotify, prefs.notifyOnBlock) { checked ->
+            prefs.notifyOnBlock = checked
+            if (checked) askForNotifications()
         }
-        findViewById<Button>(R.id.btnBlock).setOnClickListener {
-            startActivity(NumberListActivity.intent(this, NumberListActivity.MODE_BLOCK))
+        bindSwitchRow(R.id.rowEnabled, R.id.swEnabled, prefs.enabled) {
+            prefs.enabled = it; refresh()
         }
-        findViewById<Button>(R.id.btnDefaultApps).setOnClickListener { openDefaultAppsSettings() }
     }
 
     override fun onResume() {
         super.onResume()
-        refreshStatus()
+        refresh()
     }
 
-    private fun updateDetectionHint() {
-        detectionLevelHint.setText(
-            when (prefs.detectionLevel) {
+    /** A whole row toggles its switch, like Samsung's own settings. */
+    private fun bindSwitchRow(rowId: Int, switchId: Int, initial: Boolean, onChange: (Boolean) -> Unit) {
+        val sw = findViewById<MaterialSwitch>(switchId)
+        sw.isChecked = initial
+        sw.setOnCheckedChangeListener { _, checked -> onChange(checked) }
+        findViewById<View>(rowId).setOnClickListener { sw.toggle() }
+    }
+
+    private fun showDetectionLevel() {
+        val level = prefs.detectionLevel
+        findViewById<View>(R.id.detOff).isSelected = level == 0
+        findViewById<View>(R.id.detNormal).isSelected = level == 1
+        findViewById<View>(R.id.detStrict).isSelected = level == 2
+        findViewById<TextView>(R.id.detectionNote).setText(
+            when (level) {
                 0 -> R.string.det_off_hint
                 2 -> R.string.det_strict_hint
                 else -> R.string.det_normal_hint
@@ -158,16 +164,31 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
-    private fun bindSwitch(id: Int, initial: Boolean, onChange: (Boolean) -> Unit) {
-        val sw = findViewById<MaterialSwitch>(id)
-        sw.isChecked = initial
-        sw.setOnCheckedChangeListener { _, checked -> onChange(checked) }
+    private fun askForNotifications() {
+        if (Build.VERSION.SDK_INT >= 33 &&
+            !PhoneUtils.hasPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+        ) {
+            basePermsLauncher.launch(arrayOf(Manifest.permission.POST_NOTIFICATIONS))
+        }
     }
 
     private fun hasScreeningRole(): Boolean {
         val rm = getSystemService(RoleManager::class.java) ?: return false
         return rm.isRoleAvailable(RoleManager.ROLE_CALL_SCREENING) &&
             rm.isRoleHeld(RoleManager.ROLE_CALL_SCREENING)
+    }
+
+    private fun isReady(): Boolean =
+        hasScreeningRole() && PhoneUtils.hasPermission(this, Manifest.permission.READ_CONTACTS)
+
+    private fun onSetupPressed() {
+        if (isReady() && !prefs.enabled) {
+            prefs.enabled = true
+            swEnabled.isChecked = true
+            refresh()
+        } else {
+            startSetup()
+        }
     }
 
     private fun startSetup() {
@@ -182,12 +203,8 @@ class MainActivity : AppCompatActivity() {
         when {
             needed.isNotEmpty() -> basePermsLauncher.launch(needed.toTypedArray())
             !hasScreeningRole() -> requestScreeningRole()
-            !prefs.enabled -> {
-                prefs.enabled = true
-                findViewById<MaterialSwitch>(R.id.swEnabled).isChecked = true
-            }
         }
-        refreshStatus()
+        refresh()
     }
 
     private fun requestScreeningRole() {
@@ -208,7 +225,16 @@ class MainActivity : AppCompatActivity() {
             .setTitle(R.string.manual_title)
             .setMessage(R.string.manual_steps)
             .setPositiveButton(R.string.btn_default_apps) { _, _ -> openDefaultAppsSettings() }
-            .setNegativeButton(android.R.string.cancel, null)
+            .setNegativeButton(R.string.close, null)
+            .show()
+    }
+
+    private fun showHelp() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.help_title)
+            .setMessage(R.string.help_body)
+            .setPositiveButton(R.string.btn_default_apps) { _, _ -> openDefaultAppsSettings() }
+            .setNegativeButton(R.string.close, null)
             .show()
     }
 
@@ -237,43 +263,131 @@ class MainActivity : AppCompatActivity() {
             MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.scan_title)
                 .setMessage(R.string.scan_none)
-                .setPositiveButton(android.R.string.ok, null)
+                .setPositiveButton(R.string.close, null)
                 .show()
             return
         }
         val numbers = found.keys.toList()
-        val labels = numbers.map { "$it\n${found[it]}" }.toTypedArray()
+        val labels = numbers.map { "${NumberFormat.pretty(it)}\n${found[it]}" }.toTypedArray()
         val checked = BooleanArray(numbers.size) { true }
         MaterialAlertDialogBuilder(this)
-            .setTitle(getString(R.string.scan_found, numbers.size))
+            .setTitle(resources.getQuantityString(R.plurals.scan_found, numbers.size, numbers.size))
             .setMultiChoiceItems(labels, checked) { _, which, isChecked -> checked[which] = isChecked }
             .setPositiveButton(R.string.block_selected) { _, _ ->
                 var n = 0
                 numbers.forEachIndexed { i, num -> if (checked[i]) { prefs.markSpam(num); n++ } }
-                Toast.makeText(this, getString(R.string.scan_blocked, n), Toast.LENGTH_LONG).show()
-                refreshStatus()
+                Toast.makeText(
+                    this, resources.getQuantityString(R.plurals.scan_blocked, n, n), Toast.LENGTH_LONG
+                ).show()
+                refresh()
             }
-            .setNegativeButton(android.R.string.cancel, null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
-    private fun refreshStatus() {
-        val role = hasScreeningRole()
-        val contacts = PhoneUtils.hasPermission(this, Manifest.permission.READ_CONTACTS)
-        val on = role && contacts && prefs.enabled
+    // ---------- Screen state ----------
 
-        statusIcon.setImageResource(if (on) R.drawable.ic_shield else R.drawable.ic_shield_off)
-        statusTitle.setText(if (on) R.string.status_on else R.string.status_off)
-
-        val problems = mutableListOf<String>()
-        if (!contacts) problems += getString(R.string.problem_contacts)
-        if (!role) problems += getString(R.string.problem_role)
-        if (!prefs.enabled) problems += getString(R.string.problem_disabled)
-        statusText.text = if (on) getString(R.string.status_on_detail)
-        else problems.joinToString("\n") { "• $it" }
-
-        btnSetup.visibility = if (on) View.GONE else View.VISIBLE
-        blockedCount.text = getString(R.string.blocked_count, BlockedCallStore.all(this).size)
-        spamCount.text = getString(R.string.spam_count, prefs.detectedSpam.size)
+    private fun refresh() {
+        showGate()
+        showRecent()
+        findViewById<TextView>(R.id.countLog).text = BlockedCallStore.all(this).size.toString()
+        findViewById<TextView>(R.id.countAllow).text = prefs.allowList.size.toString()
+        findViewById<TextView>(R.id.countBlock).text =
+            (prefs.blockList + prefs.detectedSpam).size.toString()
     }
+
+    /** The dark panel at the top: one sentence saying who can ring you right now. */
+    private fun showGate() {
+        val ready = isReady()
+        val on = ready && prefs.enabled
+
+        val dot = findViewById<View>(R.id.statusDot)
+        val statusLine = findViewById<TextView>(R.id.statusLine)
+        val rule = findViewById<TextView>(R.id.heroRule)
+        val detail = findViewById<TextView>(R.id.heroDetail)
+        val setup = findViewById<TextView>(R.id.btnSetup)
+        val stats = findViewById<View>(R.id.statsBlock)
+
+        dot.background = ContextCompat.getDrawable(this, if (on) R.drawable.bg_dot_on else R.drawable.bg_dot_off)
+        statusLine.setText(
+            when {
+                on -> R.string.status_guarding
+                ready -> R.string.status_paused
+                else -> R.string.status_not_guarding
+            }
+        )
+
+        rule.setText(
+            when {
+                !on -> R.string.rule_anyone
+                prefs.blockUnknown -> R.string.rule_contacts_only
+                prefs.detectionLevel > 0 -> R.string.rule_no_loan_apps
+                else -> R.string.rule_block_list_only
+            }
+        )
+
+        if (on) {
+            detail.visibility = View.GONE
+            setup.visibility = View.GONE
+        } else {
+            val problems = mutableListOf<String>()
+            if (!PhoneUtils.hasPermission(this, Manifest.permission.READ_CONTACTS)) {
+                problems += getString(R.string.problem_contacts)
+            }
+            if (!hasScreeningRole()) problems += getString(R.string.problem_role)
+            detail.text = if (problems.isEmpty()) getString(R.string.problem_paused)
+            else problems.joinToString("\n")
+            detail.visibility = View.VISIBLE
+            setup.visibility = View.VISIBLE
+            setup.setText(if (ready) R.string.resume else R.string.turn_on)
+        }
+
+        val blocked = BlockStats.total(this)
+        val spam = prefs.detectedSpam.size
+        stats.visibility = if (on || blocked > 0) View.VISIBLE else View.GONE
+        findViewById<TextView>(R.id.statBlocked).text = blocked.toString()
+        findViewById<TextView>(R.id.statBlockedLabel).text =
+            resources.getQuantityString(R.plurals.calls_turned_away, blocked)
+        findViewById<TextView>(R.id.statSpam).text = spam.toString()
+        findViewById<TextView>(R.id.statSpamLabel).text =
+            resources.getQuantityString(R.plurals.spam_caught, spam)
+    }
+
+    /** The last three turned-away calls, straight from the log. */
+    private fun showRecent() {
+        val container = findViewById<LinearLayout>(R.id.recentList)
+        container.removeAllViews()
+        val calls = BlockedCallStore.all(this).take(3)
+        findViewById<View>(R.id.btnSeeAll).visibility = if (calls.isEmpty()) View.GONE else View.VISIBLE
+
+        if (calls.isEmpty()) {
+            val empty = TextView(this).apply {
+                setText(R.string.recent_empty)
+                setTextColor(ContextCompat.getColor(context, R.color.muted))
+                textSize = 15f
+                val pad = dp(20)
+                setPadding(dp(18), pad, dp(18), pad)
+            }
+            container.addView(empty)
+            return
+        }
+
+        val inflater = LayoutInflater.from(this)
+        calls.forEachIndexed { i, call ->
+            if (i > 0) container.addView(divider())
+            val row = inflater.inflate(R.layout.item_call, container, false)
+            CallDisplay.bind(row, call)
+            row.setOnClickListener { startActivity(Intent(this, BlockedLogActivity::class.java)) }
+            container.addView(row)
+        }
+    }
+
+    private fun divider(): View = View(this).apply {
+        layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(1)).apply {
+            marginStart = dp(18)
+        }
+        setBackgroundColor(ContextCompat.getColor(context, R.color.line))
+    }
+
+    private fun dp(v: Int): Int = (v * resources.displayMetrics.density).toInt()
 }

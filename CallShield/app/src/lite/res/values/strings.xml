@@ -2,6 +2,6 @@
 <!-- Lite edition text overrides -->
 <resources>
     <string name="app_name">CallShield Lite</string>
-    <string name="sw_ask_hint">Shows a \"Block as loan spam\" button while an unknown number is ringing. Tap it, then decline the call: that number will never ring again.</string>
-    <string name="toast_spam_next_time">Blocked. Decline this call now; this number will not ring again.</string>
+    <string name="r_ask_sub">Adds a “Block as loan spam” button. Decline the call and it won’t ring again</string>
+    <string name="toast_spam_next_time">Blocked. Decline this call; it won’t ring again.</string>
 </resources>

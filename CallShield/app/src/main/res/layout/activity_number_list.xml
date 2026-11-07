@@ -1,79 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp">
+
+    <include layout="@layout/view_header" />
 
     <TextView
         android:id="@+id/listHint"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
-        android:textAppearance="?attr/textAppearanceBodyMedium" />
+        android:layout_marginStart="6dp"
+        android:layout_marginEnd="6dp"
+        android:layout_marginBottom="14dp"
+        style="@style/Text.RowSub" />
 
+    <!-- Add a number -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/bg_group"
         android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingStart="18dp"
+        android:paddingTop="6dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="6dp">
 
-        <com.google.android.material.textfield.TextInputLayout
+        <EditText
+            android:id="@+id/input"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="52dp"
             android:layout_weight="1"
-            android:hint="@string/number_hint">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/input"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:digits="0123456789+* "
-                android:inputType="phone"
-                android:maxLines="1" />
-        </com.google.android.material.textfield.TextInputLayout>
+            android:background="@android:color/transparent"
+            android:digits="0123456789+* "
+            android:fontFeatureSettings="tnum"
+            android:hint="@string/number_hint"
+            android:importantForAutofill="no"
+            android:inputType="phone"
+            android:maxLines="1"
+            android:textColor="@color/ink"
+            android:textColorHint="@color/muted"
+            android:textSize="16sp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnAdd"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:text="@string/add" />
+            android:layout_height="48dp"
+            android:text="@string/add"
+            android:textColor="@color/gate_ink"
+            app:backgroundTint="@color/gate"
+            app:cornerRadius="14dp" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="8dp"
         android:orientation="horizontal">
 
-        <com.google.android.material.button.MaterialButton
+        <TextView
             android:id="@+id/btnPaste"
-            style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/paste_list" />
+            android:background="?attr/selectableItemBackground"
+            android:fontFamily="sans-serif-medium"
+            android:padding="10dp"
+            android:text="@string/paste_list"
+            android:textColor="@color/green"
+            android:textSize="14sp" />
 
-        <com.google.android.material.button.MaterialButton
+        <TextView
             android:id="@+id/btnShare"
-            style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/share_list" />
+            android:background="?attr/selectableItemBackground"
+            android:fontFamily="sans-serif-medium"
+            android:padding="10dp"
+            android:text="@string/share_list"
+            android:textColor="@color/green"
+            android:textSize="14sp" />
     </LinearLayout>
 
     <TextView
         android:id="@+id/empty"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:background="@drawable/bg_group"
         android:gravity="center"
+        android:padding="28dp"
         android:text="@string/list_empty"
-        android:textAppearance="?attr/textAppearanceBodyMedium" />
+        android:textColor="@color/muted"
+        android:textSize="15sp" />
 
     <ListView
         android:id="@+id/list"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="8dp"
-        android:layout_weight="1" />
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/bg_group"
+        android:divider="@drawable/divider_inset"
+        android:dividerHeight="1dp" />
 </LinearLayout>

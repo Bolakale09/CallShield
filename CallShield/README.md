@@ -87,10 +87,12 @@ Every build makes two APKs (inside the downloaded zip):
   Lite keeps blocking unknown numbers and the loan-app pattern detector, which learns from the
   calls it screens.
 
-### Your own signing key
+### Your own signing key (required)
 Add the two secrets from `CallShield-signing-secrets.txt` (Settings › Secrets and variables ›
-Actions). APKs are then signed with your own key instead of Android's shared test key, which
-security checks distrust. Keep that file private and don't upload it to GitHub.
+Actions). The build **stops with an error if they're missing**, and checks every APK against
+the fingerprint in `signing-cert-sha256.txt`. That way every build is signed with the same key,
+and new versions install as updates without losing your lists. Keep the secrets file private and
+don't upload it to GitHub.
 
 ## Install and set up on Samsung
 
@@ -109,6 +111,14 @@ security checks distrust. Keep that file private and don't upload it to GitHub.
 children's school, hospital, family members using a new line) or add them to the
 allow list. Keep *Let repeat callers through* on if you're worried about missing
 an emergency call from a stranger.
+
+## Reliability
+
+- Call checks run on a background thread. If they ever take longer than 3.5 seconds, the call
+  rings, so CallShield fails safe instead of Android silently giving up.
+- History files are written crash-safely (temporary file, then swap) and cached in memory.
+- "Calls turned away" is a lifetime counter, not limited by the 300-entry log.
+- Blocked calls produce one silent notification with today's count, not one per call.
 
 ## Good to know
 

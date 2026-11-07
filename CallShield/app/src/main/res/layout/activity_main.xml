@@ -3,215 +3,354 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:fillViewport="true"
+    android:fitsSystemWindows="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="32dp">
 
-        <!-- Status card -->
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/statusCard"
+        <!-- Top bar -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="6dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/Text.Wordmark"
+                android:text="@string/wordmark" />
+
+            <TextView
+                android:id="@+id/edition"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:textColor="@color/muted"
+                android:textSize="13sp"
+                android:visibility="gone" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <ImageButton
+                android:id="@+id/btnHelp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_icon_button"
+                android:contentDescription="@string/help_title"
+                android:src="@drawable/ic_help" />
+        </LinearLayout>
+
+        <!-- The gate: what CallShield is doing right now -->
+        <LinearLayout
+            android:id="@+id/gate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp">
+            android:layout_marginTop="4dp"
+            android:background="@drawable/bg_gate"
+            android:orientation="vertical"
+            android:paddingStart="22dp"
+            android:paddingTop="22dp"
+            android:paddingEnd="22dp"
+            android:paddingBottom="20dp">
 
             <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <View
+                    android:id="@+id/statusDot"
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"
+                    android:background="@drawable/bg_dot_on" />
+
+                <TextView
+                    android:id="@+id/statusLine"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    style="@style/Text.GateSmall"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/heroRule"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="20dp">
+                android:layout_marginTop="16dp"
+                style="@style/Text.Hero" />
 
-                <ImageView
-                    android:id="@+id/statusIcon"
-                    android:layout_width="56dp"
-                    android:layout_height="56dp"
-                    android:contentDescription="@null"
-                    android:src="@drawable/ic_shield" />
+            <TextView
+                android:id="@+id/heroDetail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                style="@style/Text.GateSmall"
+                android:textSize="14sp"
+                android:visibility="gone" />
 
-                <TextView
-                    android:id="@+id/statusTitle"
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSetup"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="18dp"
+                android:text="@string/turn_on"
+                android:textColor="@color/gate"
+                android:textSize="16sp"
+                app:backgroundTint="@color/gate_ink"
+                app:cornerRadius="16dp" />
+
+            <LinearLayout
+                android:id="@+id/statsBlock"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="22dp"
+                android:orientation="vertical">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/gate_rule" />
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:textAppearance="?attr/textAppearanceHeadlineSmall" />
+                    android:orientation="horizontal"
+                    android:paddingTop="14dp">
 
-                <TextView
-                    android:id="@+id/statusText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:textAppearance="?attr/textAppearanceBodyMedium" />
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="32dp"
+                        android:orientation="vertical">
+                        <TextView android:id="@+id/statBlocked" android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" style="@style/Text.Stat" />
+                        <TextView android:id="@+id/statBlockedLabel" android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" style="@style/Text.GateSmall" />
+                    </LinearLayout>
 
-                <TextView
-                    android:id="@+id/blockedCount"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:textAppearance="?attr/textAppearanceLabelLarge" />
-
-                <TextView
-                    android:id="@+id/spamCount"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?attr/textAppearanceLabelLarge" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnSetup"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:text="@string/turn_on" />
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+                        <TextView android:id="@+id/statSpam" android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" style="@style/Text.Stat" />
+                        <TextView android:id="@+id/statSpamLabel" android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" style="@style/Text.GateSmall" />
+                    </LinearLayout>
+                </LinearLayout>
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
 
-        <TextView
-            style="@style/SectionHeader"
-            android:text="@string/section_detection" />
-
-        <TextView style="@style/RuleHint" android:text="@string/detection_hint" />
-
-        <com.google.android.material.button.MaterialButtonToggleGroup
-            android:id="@+id/detectionGroup"
+        <!-- Recent turned-away calls -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:selectionRequired="true"
-            app:singleSelection="true">
+            android:gravity="bottom"
+            android:orientation="horizontal">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/detOff"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+            <TextView style="@style/Text.Section" android:text="@string/sec_turned_away" />
+
+            <Space
                 android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/btnSeeAll"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/det_off" />
+                android:layout_marginBottom="4dp"
+                android:background="?attr/selectableItemBackground"
+                android:fontFamily="sans-serif-medium"
+                android:padding="6dp"
+                android:text="@string/see_all"
+                android:textColor="@color/green"
+                android:textSize="14sp" />
+        </LinearLayout>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/detNormal"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/det_normal" />
+        <LinearLayout android:id="@+id/recentList" style="@style/Group" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/detStrict"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/det_strict" />
-        </com.google.android.material.button.MaterialButtonToggleGroup>
+        <TextView style="@style/Text.Section" android:text="@string/sec_who" />
+        <LinearLayout style="@style/Group">
+            <LinearLayout android:id="@+id/rowUnknown" style="@style/Row">
+                <LinearLayout style="@style/RowText">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        style="@style/Text.RowTitle" android:text="@string/r_unknown" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp" style="@style/Text.RowSub" android:text="@string/r_unknown_sub" />
+                </LinearLayout>
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/swUnknown" style="@style/RowSwitch" />
+            </LinearLayout>
+            <View style="@style/Divider" />
+            <LinearLayout android:id="@+id/rowHidden" style="@style/Row">
+                <LinearLayout style="@style/RowText">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        style="@style/Text.RowTitle" android:text="@string/r_hidden" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp" style="@style/Text.RowSub" android:text="@string/r_hidden_sub" />
+                </LinearLayout>
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/swHidden" style="@style/RowSwitch" />
+            </LinearLayout>
+            <View style="@style/Divider" />
+            <LinearLayout android:id="@+id/rowRepeat" style="@style/Row">
+                <LinearLayout style="@style/RowText">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        style="@style/Text.RowTitle" android:text="@string/r_repeat" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp" style="@style/Text.RowSub" android:text="@string/r_repeat_sub" />
+                </LinearLayout>
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/swRepeat" style="@style/RowSwitch" />
+            </LinearLayout>
+            <View style="@style/Divider" />
+            <LinearLayout android:id="@+id/rowAsk" style="@style/Row">
+                <LinearLayout style="@style/RowText">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        style="@style/Text.RowTitle" android:text="@string/r_ask" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp" style="@style/Text.RowSub" android:text="@string/r_ask_sub" />
+                </LinearLayout>
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/swAsk" style="@style/RowSwitch" />
+            </LinearLayout>
+        </LinearLayout>
 
-        <TextView
-            android:id="@+id/detectionLevelHint"
-            style="@style/RuleHint"
-            android:layout_marginTop="4dp" />
-
-        <com.google.android.material.materialswitch.MaterialSwitch
-            android:id="@+id/swAsk"
-            style="@style/RuleSwitch"
-            android:text="@string/sw_ask" />
-        <TextView style="@style/RuleHint" android:text="@string/sw_ask_hint" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnScan"
-            style="@style/Widget.Material3.Button.TonalButton"
+        <TextView style="@style/Text.Section" android:text="@string/section_detection" />
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/btn_scan" />
+            android:background="@drawable/bg_seg_track"
+            android:orientation="horizontal"
+            android:padding="4dp">
+
+            <TextView android:id="@+id/detOff" style="@style/Segment" android:text="@string/det_off" />
+            <TextView android:id="@+id/detNormal" style="@style/Segment"
+                android:layout_marginStart="4dp" android:text="@string/det_normal" />
+            <TextView android:id="@+id/detStrict" style="@style/Segment"
+                android:layout_marginStart="4dp" android:text="@string/det_strict" />
+        </LinearLayout>
+
+        <TextView android:id="@+id/detectionNote" style="@style/Text.Note" />
+
+        <LinearLayout
+            android:id="@+id/groupScan"
+            style="@style/Group"
+            android:layout_marginTop="14dp">
+            <LinearLayout android:id="@+id/rowScan" style="@style/Row">
+                <LinearLayout style="@style/RowText">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        style="@style/Text.RowTitle" android:text="@string/btn_scan" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp" style="@style/Text.RowSub" android:text="@string/scan_sub" />
+                </LinearLayout>
+                <ImageView style="@style/RowChevron" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView style="@style/Text.Section" android:text="@string/sec_lists" />
+        <LinearLayout style="@style/Group">
+            <LinearLayout android:id="@+id/rowLog" style="@style/Row">
+                <LinearLayout style="@style/RowText">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        style="@style/Text.RowTitle" android:text="@string/btn_log" />
+                </LinearLayout>
+                <TextView android:id="@+id/countLog" style="@style/RowCount" />
+                <ImageView style="@style/RowChevron" />
+            </LinearLayout>
+            <View style="@style/Divider" />
+            <LinearLayout android:id="@+id/rowAllow" style="@style/Row">
+                <LinearLayout style="@style/RowText">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        style="@style/Text.RowTitle" android:text="@string/btn_allow" />
+                </LinearLayout>
+                <TextView android:id="@+id/countAllow" style="@style/RowCount" />
+                <ImageView style="@style/RowChevron" />
+            </LinearLayout>
+            <View style="@style/Divider" />
+            <LinearLayout android:id="@+id/rowBlock" style="@style/Row">
+                <LinearLayout style="@style/RowText">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        style="@style/Text.RowTitle" android:text="@string/btn_block" />
+                </LinearLayout>
+                <TextView android:id="@+id/countBlock" style="@style/RowCount" />
+                <ImageView style="@style/RowChevron" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView style="@style/Text.Section" android:text="@string/sec_more" />
+        <LinearLayout style="@style/Group">
+            <LinearLayout android:id="@+id/rowCalled" style="@style/Row">
+                <LinearLayout style="@style/RowText">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        style="@style/Text.RowTitle" android:text="@string/r_called" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp" style="@style/Text.RowSub" android:text="@string/r_called_sub" />
+                </LinearLayout>
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/swCalledBefore" style="@style/RowSwitch" />
+            </LinearLayout>
+            <View android:id="@+id/divCalled" style="@style/Divider" />
+            <LinearLayout android:id="@+id/rowSilence" style="@style/Row">
+                <LinearLayout style="@style/RowText">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        style="@style/Text.RowTitle" android:text="@string/r_silence" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp" style="@style/Text.RowSub" android:text="@string/r_silence_sub" />
+                </LinearLayout>
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/swSilence" style="@style/RowSwitch" />
+            </LinearLayout>
+            <View style="@style/Divider" />
+            <LinearLayout android:id="@+id/rowNotify" style="@style/Row">
+                <LinearLayout style="@style/RowText">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        style="@style/Text.RowTitle" android:text="@string/r_notify" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp" style="@style/Text.RowSub" android:text="@string/r_notify_sub" />
+                </LinearLayout>
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/swNotify" style="@style/RowSwitch" />
+            </LinearLayout>
+            <View style="@style/Divider" />
+            <LinearLayout android:id="@+id/rowEnabled" style="@style/Row">
+                <LinearLayout style="@style/RowText">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        style="@style/Text.RowTitle" android:text="@string/r_enabled" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp" style="@style/Text.RowSub" android:text="@string/r_enabled_sub" />
+                </LinearLayout>
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/swEnabled" style="@style/RowSwitch" />
+            </LinearLayout>
+            <View style="@style/Divider" />
+            <LinearLayout android:id="@+id/rowHelp" style="@style/Row">
+                <LinearLayout style="@style/RowText">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        style="@style/Text.RowTitle" android:text="@string/help_title" />
+                </LinearLayout>
+                <ImageView style="@style/RowChevron" />
+            </LinearLayout>
+        </LinearLayout>
 
         <TextView
-            style="@style/SectionHeader"
-            android:text="@string/section_rules" />
-
-        <com.google.android.material.materialswitch.MaterialSwitch
-            android:id="@+id/swEnabled"
-            style="@style/RuleSwitch"
-            android:text="@string/sw_enabled" />
-
-        <com.google.android.material.materialswitch.MaterialSwitch
-            android:id="@+id/swUnknown"
-            style="@style/RuleSwitch"
-            android:text="@string/sw_unknown" />
-        <TextView style="@style/RuleHint" android:text="@string/sw_unknown_hint" />
-
-        <com.google.android.material.materialswitch.MaterialSwitch
-            android:id="@+id/swHidden"
-            style="@style/RuleSwitch"
-            android:text="@string/sw_hidden" />
-        <TextView style="@style/RuleHint" android:text="@string/sw_hidden_hint" />
-
-        <com.google.android.material.materialswitch.MaterialSwitch
-            android:id="@+id/swCalledBefore"
-            style="@style/RuleSwitch"
-            android:text="@string/sw_called" />
-        <TextView
-            android:id="@+id/swCalledBeforeHint"
-            style="@style/RuleHint"
-            android:text="@string/sw_called_hint" />
-
-        <com.google.android.material.materialswitch.MaterialSwitch
-            android:id="@+id/swRepeat"
-            style="@style/RuleSwitch"
-            android:text="@string/sw_repeat" />
-        <TextView style="@style/RuleHint" android:text="@string/sw_repeat_hint" />
-
-        <com.google.android.material.materialswitch.MaterialSwitch
-            android:id="@+id/swSilence"
-            style="@style/RuleSwitch"
-            android:text="@string/sw_silence" />
-        <TextView style="@style/RuleHint" android:text="@string/sw_silence_hint" />
-
-        <com.google.android.material.materialswitch.MaterialSwitch
-            android:id="@+id/swNotify"
-            style="@style/RuleSwitch"
-            android:text="@string/sw_notify" />
-
-        <TextView
-            style="@style/SectionHeader"
-            android:text="@string/section_lists" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnLog"
-            style="@style/Widget.Material3.Button.TonalButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/btn_log" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnAllow"
-            style="@style/Widget.Material3.Button.OutlinedButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/btn_allow" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnBlock"
-            style="@style/Widget.Material3.Button.OutlinedButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/btn_block" />
-
-        <TextView
-            style="@style/SectionHeader"
-            android:text="@string/section_samsung" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:lineSpacingMultiplier="1.2"
-            android:text="@string/samsung_tips"
-            android:textAppearance="?attr/textAppearanceBodyMedium" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnDefaultApps"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/btn_default_apps" />
+            style="@style/Text.Note"
+            android:layout_marginTop="24dp"
+            android:gravity="center"
+            android:text="@string/offline_note" />
     </LinearLayout>
 </ScrollView>

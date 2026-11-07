@@ -3,46 +3,45 @@ package com.callshield.ng
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.text.format.DateUtils
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.Button
 import android.widget.ListView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
-/** List of calls CallShield has blocked. Tap one to allow, block for good, or call back. */
+/** Every call CallShield turned away. Tap one to allow it, mark it as spam, block it or call back. */
 class BlockedLogActivity : AppCompatActivity() {
 
     private lateinit var adapter: ArrayAdapter<BlockedCall>
-    private lateinit var empty: TextView
+    private lateinit var empty: View
+    private lateinit var list: ListView
+    private lateinit var clear: TextView
     private lateinit var prefs: Prefs
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_blocked_log)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        setTitle(R.string.btn_log)
         prefs = Prefs(this)
 
-        empty = findViewById(R.id.empty)
-        val list = findViewById<ListView>(R.id.list)
+        findViewById<View>(R.id.headerBack).setOnClickListener { finish() }
+        findViewById<TextView>(R.id.headerTitle).setText(R.string.btn_log)
+        clear = findViewById(R.id.headerAction)
+        clear.setText(R.string.clear_log)
+        clear.setOnClickListener { confirmClear() }
 
-        adapter = object : ArrayAdapter<BlockedCall>(
-            this, android.R.layout.simple_list_item_2, android.R.id.text1, mutableListOf()
-        ) {
+        empty = findViewById(R.id.empty)
+        list = findViewById(R.id.list)
+        list.clipToOutline = true
+
+        val inflater = LayoutInflater.from(this)
+        adapter = object : ArrayAdapter<BlockedCall>(this, R.layout.item_call, mutableListOf()) {
             override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-                val v = super.getView(position, convertView, parent)
-                val item = getItem(position)!!
-                v.findViewById<TextView>(android.R.id.text1).text = item.number
-                val ago = DateUtils.getRelativeDateTimeString(
-                    context, item.time, DateUtils.MINUTE_IN_MILLIS,
-                    DateUtils.WEEK_IN_MILLIS, 0
-                )
-                v.findViewById<TextView>(android.R.id.text2).text = "$ago · ${item.reason}"
+                val v = convertView ?: inflater.inflate(R.layout.item_call, parent, false)
+                CallDisplay.bind(v, getItem(position)!!)
                 return v
             }
         }
@@ -58,7 +57,7 @@ class BlockedLogActivity : AppCompatActivity() {
                 getString(R.string.action_call)
             )
             MaterialAlertDialogBuilder(this)
-                .setTitle(item.number)
+                .setTitle(NumberFormat.pretty(item.number))
                 .setItems(options) { _, which ->
                     when (which) {
                         0 -> {
@@ -80,11 +79,6 @@ class BlockedLogActivity : AppCompatActivity() {
                 }
                 .show()
         }
-
-        findViewById<Button>(R.id.btnClear).setOnClickListener {
-            BlockedCallStore.clear(this)
-            reload()
-        }
         reload()
     }
 
@@ -93,16 +87,25 @@ class BlockedLogActivity : AppCompatActivity() {
         reload()
     }
 
+    private fun confirmClear() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.clear_title)
+            .setMessage(R.string.clear_body)
+            .setPositiveButton(R.string.clear_log) { _, _ ->
+                BlockedCallStore.clear(this)
+                reload()
+            }
+            .setNegativeButton(R.string.cancel, null)
+            .show()
+    }
+
     private fun reload() {
         val items = BlockedCallStore.all(this)
         adapter.clear()
         adapter.addAll(items)
         adapter.notifyDataSetChanged()
         empty.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
-    }
-
-    override fun onSupportNavigateUp(): Boolean {
-        finish()
-        return true
+        list.visibility = if (items.isEmpty()) View.GONE else View.VISIBLE
+        clear.visibility = if (items.isEmpty()) View.GONE else View.VISIBLE
     }
 }

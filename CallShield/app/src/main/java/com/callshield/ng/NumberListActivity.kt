@@ -4,10 +4,12 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.text.InputType
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.Button
 import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.ListView
 import android.widget.TextView
 import android.widget.Toast
@@ -16,37 +18,52 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 /**
  * Shows and edits either the allow list or the block list.
- * The block list also shows numbers caught by the loan-app pattern detector ("auto").
+ * The block list also shows numbers caught by the loan-app pattern detector.
  */
 class NumberListActivity : AppCompatActivity() {
 
     private data class Row(val entry: String, val auto: Boolean)
 
     private lateinit var prefs: Prefs
-    private lateinit var adapter: ArrayAdapter<String>
-    private lateinit var empty: TextView
+    private lateinit var adapter: ArrayAdapter<Row>
+    private lateinit var empty: View
+    private lateinit var list: ListView
     private var rows: List<Row> = emptyList()
     private var mode = MODE_ALLOW
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_number_list)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
         prefs = Prefs(this)
         mode = intent.getIntExtra(EXTRA_MODE, MODE_ALLOW)
 
-        title = getString(if (mode == MODE_ALLOW) R.string.btn_allow else R.string.btn_block)
+        findViewById<View>(R.id.headerBack).setOnClickListener { finish() }
+        findViewById<TextView>(R.id.headerTitle).setText(
+            if (mode == MODE_ALLOW) R.string.btn_allow else R.string.btn_block
+        )
         findViewById<TextView>(R.id.listHint).setText(
             if (mode == MODE_ALLOW) R.string.allow_hint else R.string.block_hint
         )
 
         empty = findViewById(R.id.empty)
+        list = findViewById(R.id.list)
+        list.clipToOutline = true
         val input = findViewById<EditText>(R.id.input)
-        val list = findViewById<ListView>(R.id.list)
-        adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, mutableListOf())
+
+        val inflater = LayoutInflater.from(this)
+        adapter = object : ArrayAdapter<Row>(this, R.layout.item_number, mutableListOf()) {
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                val v = convertView ?: inflater.inflate(R.layout.item_number, parent, false)
+                val row = getItem(position)!!
+                v.findViewById<TextView>(R.id.itemNumber).text = NumberFormat.pretty(row.entry)
+                v.findViewById<View>(R.id.itemNote).visibility = if (row.auto) View.VISIBLE else View.GONE
+                if (row.auto) v.findViewById<TextView>(R.id.itemNote).setText(R.string.auto_note)
+                return v
+            }
+        }
         list.adapter = adapter
 
-        findViewById<Button>(R.id.btnAdd).setOnClickListener {
+        findViewById<View>(R.id.btnAdd).setOnClickListener {
             val entry = PhoneUtils.normalize(input.text?.toString())
             // Reject empty input and too-short prefixes like "0*" that would block everyone
             if (entry.isEmpty() || entry.trimEnd('*').length < 4) {
@@ -58,13 +75,13 @@ class NumberListActivity : AppCompatActivity() {
             reload()
         }
 
-        findViewById<Button>(R.id.btnPaste).setOnClickListener { showPasteDialog() }
-        findViewById<Button>(R.id.btnShare).setOnClickListener { shareList() }
+        findViewById<View>(R.id.btnPaste).setOnClickListener { showPasteDialog() }
+        findViewById<View>(R.id.btnShare).setOnClickListener { shareList() }
 
         list.setOnItemClickListener { _, _, position, _ ->
             val row = rows.getOrNull(position) ?: return@setOnItemClickListener
             MaterialAlertDialogBuilder(this)
-                .setTitle(row.entry)
+                .setTitle(NumberFormat.pretty(row.entry))
                 .setMessage(R.string.remove_question)
                 .setPositiveButton(R.string.remove) { _, _ ->
                     when {
@@ -74,7 +91,7 @@ class NumberListActivity : AppCompatActivity() {
                     }
                     reload()
                 }
-                .setNegativeButton(android.R.string.cancel, null)
+                .setNegativeButton(R.string.cancel, null)
                 .show()
         }
         reload()
@@ -91,20 +108,28 @@ class NumberListActivity : AppCompatActivity() {
             minLines = 4
             setHint(R.string.paste_hint)
         }
+        val pad = (20 * resources.displayMetrics.density).toInt()
+        val frame = FrameLayout(this).apply {
+            setPadding(pad, pad / 2, pad, 0)
+            addView(box)
+        }
         MaterialAlertDialogBuilder(this)
             .setTitle(R.string.paste_list)
-            .setView(box)
+            .setView(frame)
             .setPositiveButton(R.string.add) { _, _ ->
                 val entries = box.text.toString()
                     .split('\n', ',', ';')
                     .map { PhoneUtils.normalize(it) }
-                    .filter { it.isNotEmpty() && it != "*" && it.trimEnd('*').length >= 4 }
+                    .filter { it.isNotEmpty() && it.trimEnd('*').length >= 4 }
                     .toSet()
                 entries.forEach { add(it) }
-                Toast.makeText(this, getString(R.string.pasted_count, entries.size), Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this, resources.getQuantityString(R.plurals.pasted_count, entries.size, entries.size),
+                    Toast.LENGTH_SHORT
+                ).show()
                 reload()
             }
-            .setNegativeButton(android.R.string.cancel, null)
+            .setNegativeButton(R.string.cancel, null)
             .show()
     }
 
@@ -131,14 +156,10 @@ class NumberListActivity : AppCompatActivity() {
                 (prefs.detectedSpam - prefs.blockList).sorted().map { Row(it, true) }
         }
         adapter.clear()
-        adapter.addAll(rows.map { if (it.auto) getString(R.string.auto_suffix, it.entry) else it.entry })
+        adapter.addAll(rows)
         adapter.notifyDataSetChanged()
         empty.visibility = if (rows.isEmpty()) View.VISIBLE else View.GONE
-    }
-
-    override fun onSupportNavigateUp(): Boolean {
-        finish()
-        return true
+        list.visibility = if (rows.isEmpty()) View.GONE else View.VISIBLE
     }
 
     companion object {

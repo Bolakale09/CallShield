@@ -58,6 +58,12 @@ object NumberFormat {
         return da.dropLast(3) == db.dropLast(3)
     }
 
+    /** "08031234567" -> "0803 123 4567" for display. Anything else is returned unchanged. */
+    fun pretty(n: String): String =
+        if (n.length == 11 && n.startsWith("0") && n.all { it.isDigit() })
+            "${n.substring(0, 4)} ${n.substring(4, 7)} ${n.substring(7)}"
+        else n
+
     /** "08031234567" -> "0803123 4xxx" style label for the number block. */
     fun blockLabel(n: String): String = if (n.length > 3) n.dropLast(3) + "xxx" else n
 

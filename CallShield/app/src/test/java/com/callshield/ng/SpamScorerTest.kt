@@ -107,4 +107,10 @@ class SpamScorerTest {
         assertEquals("070*", NumberFormat.normalize("+23470*"))
         assertTrue(NumberFormat.matchesList("07012345678", setOf("070*")))
     }
+
+    @Test fun numbersAreSpacedForReading() {
+        assertEquals("0803 123 4567", NumberFormat.pretty("08031234567"))
+        assertEquals("0700*", NumberFormat.pretty("0700*"))
+        assertEquals("+447700900123", NumberFormat.pretty("+447700900123"))
+    }
 }

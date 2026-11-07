@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ground">#0E1512</color>
+    <color name="surface">#18211D</color>
+    <color name="ink">#E7EEE9</color>
+    <color name="muted">#95A39B</color>
+    <color name="line">#26312C</color>
+    <color name="outline">#3B4842</color>
+    <color name="track_off">#33403A</color>
+    <color name="gate">#164A36</color>
+    <color name="gate_ink">#EDF5F0</color>
+    <color name="gate_muted">#A3C4B2</color>
+    <color name="gate_rule">#2C6049</color>
+    <color name="green">#4CC38A</color>
+    <color name="green_soft">#1E3A2D</color>
+    <color name="kola">#EE9087</color>
+    <color name="kola_bg">#3A1F1D</color>
+    <color name="dot_on">#5FD39A</color>
+    <color name="dot_off">#E58A7F</color>
+
+    <color name="shield_green">#4CC38A</color>
+    <color name="shield_grey">#7C8A83</color>
+</resources>

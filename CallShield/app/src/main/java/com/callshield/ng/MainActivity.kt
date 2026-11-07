@@ -77,6 +77,14 @@ class MainActivity : AppCompatActivity() {
 
         btnSetup.setOnClickListener { startSetup() }
 
+        // Lite edition has no call-log permission: hide the features that need it
+        if (!BuildConfig.CALL_LOG_FEATURES) {
+            swCalledBefore.visibility = View.GONE
+            findViewById<View>(R.id.swCalledBeforeHint).visibility = View.GONE
+            findViewById<View>(R.id.btnScan).visibility = View.GONE
+            prefs.allowCalledBefore = false
+        }
+
         // Loan-app spam detection strength
         val group = findViewById<MaterialButtonToggleGroup>(R.id.detectionGroup)
         group.check(
@@ -163,11 +171,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startSetup() {
-        val wanted = mutableListOf(
-            Manifest.permission.READ_CONTACTS,
-            Manifest.permission.READ_CALL_LOG,       // better spam detection (optional)
-            Manifest.permission.ANSWER_PHONE_CALLS   // "Block as loan spam" hangs up (optional)
-        )
+        val wanted = mutableListOf(Manifest.permission.READ_CONTACTS)
+        if (BuildConfig.CALL_LOG_FEATURES) {
+            wanted += Manifest.permission.READ_CALL_LOG        // better spam detection (optional)
+            wanted += Manifest.permission.ANSWER_PHONE_CALLS   // "Block as loan spam" hangs up (optional)
+        }
         if (Build.VERSION.SDK_INT >= 33) wanted += Manifest.permission.POST_NOTIFICATIONS
         val needed = wanted.filter { !PhoneUtils.hasPermission(this, it) }
 

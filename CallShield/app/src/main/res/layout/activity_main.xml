@@ -149,7 +149,10 @@
             android:id="@+id/swCalledBefore"
             style="@style/RuleSwitch"
             android:text="@string/sw_called" />
-        <TextView style="@style/RuleHint" android:text="@string/sw_called_hint" />
+        <TextView
+            android:id="@+id/swCalledBeforeHint"
+            style="@style/RuleHint"
+            android:text="@string/sw_called_hint" />
 
         <com.google.android.material.materialswitch.MaterialSwitch
             android:id="@+id/swRepeat"

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Lite edition: removes the two permissions that anti-phishing checks
+     (e.g. Samsung's "Suspected voice phishing" blocker) treat as most dangerous. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.READ_CALL_LOG" tools:node="remove" />
+    <uses-permission android:name="android.permission.ANSWER_PHONE_CALLS" tools:node="remove" />
+</manifest>

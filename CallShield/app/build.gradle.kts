@@ -3,6 +3,12 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
+// Your own signing key (set by the GitHub build from the KEYSTORE_BASE64 / KEYSTORE_PASSWORD secrets).
+// Without it the APK falls back to Android's shared debug key, which Samsung and Play Protect distrust.
+val ownKeystore: String? = System.getenv("CALLSHIELD_KEYSTORE_FILE")
+val ownKeyPassword: String? = System.getenv("CALLSHIELD_KEYSTORE_PASSWORD")
+val hasOwnKey = ownKeystore?.let { file(it).exists() } == true && !ownKeyPassword.isNullOrEmpty()
+
 android {
     namespace = "com.callshield.ng"
     compileSdk = 35
@@ -11,16 +17,47 @@ android {
         applicationId = "com.callshield.ng"
         minSdk = 29          // Android 10+ (call screening role)
         targetSdk = 35
-        versionCode = 2
-        versionName = "1.1"
+        versionCode = 3
+        versionName = "1.2"
+    }
+
+    buildFeatures {
+        buildConfig = true
+    }
+
+    // Two editions are built every time:
+    //  full - everything, including call-history features and hang-up from the notification
+    //  lite - no call-log or hang-up permissions, for phones whose anti-phishing check blocks "full"
+    flavorDimensions += "edition"
+    productFlavors {
+        create("full") {
+            dimension = "edition"
+            buildConfigField("boolean", "CALL_LOG_FEATURES", "true")
+        }
+        create("lite") {
+            dimension = "edition"
+            applicationIdSuffix = ".lite"
+            versionNameSuffix = "-lite"
+            buildConfigField("boolean", "CALL_LOG_FEATURES", "false")
+        }
+    }
+
+    signingConfigs {
+        create("own") {
+            if (hasOwnKey) {
+                storeFile = file(ownKeystore!!)
+                storePassword = ownKeyPassword
+                keyAlias = "callshield"
+                keyPassword = ownKeyPassword
+            }
+        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
-            // Signed with the debug key so the release APK is installable straight away.
-            // Replace with your own keystore before publishing anywhere.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = if (hasOwnKey) signingConfigs.getByName("own")
+            else signingConfigs.getByName("debug")
         }
     }
 

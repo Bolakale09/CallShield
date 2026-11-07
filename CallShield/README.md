@@ -74,6 +74,24 @@ The rules are covered by unit tests (`app/src/test/.../SpamScorerTest.kt`), and 
 Open this folder in Android Studio, wait for Gradle sync, then use
 **Build › Build App Bundle(s) / APK(s) › Build APK(s)**.
 
+## Two editions: Full and Lite
+
+Every build makes two APKs (inside the downloaded zip):
+
+- **app-full-release.apk**: everything, including the call-history scan, "allow numbers I've called"
+  and hang-up from the "Block as loan spam" notification.
+- **app-lite-release.apk**: no call-log or hang-up permissions. Use it if Samsung shows
+  **"Suspected voice phishing – this app can't be installed"** for the full edition. Samsung's
+  built-in anti-phishing check (One UI 6.1+) blocks sideloaded apps that combine call screening
+  with call-log reading and call hang-up, because phone-scam apps use that same mix.
+  Lite keeps blocking unknown numbers and the loan-app pattern detector, which learns from the
+  calls it screens.
+
+### Your own signing key
+Add the two secrets from `CallShield-signing-secrets.txt` (Settings › Secrets and variables ›
+Actions). APKs are then signed with your own key instead of Android's shared test key, which
+security checks distrust. Keep that file private and don't upload it to GitHub.
+
 ## Install and set up on Samsung
 
 1. Open the APK. If asked, allow **Install unknown apps** for your browser or My Files.

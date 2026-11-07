@@ -1,0 +1,44 @@
+name: Build APK
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Run spam-detector tests
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon testDebugUnitTest
+
+      - name: Build APK
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleRelease
+
+      - name: Check the APK has no internet permission
+        run: |
+          AAPT2=$(ls -d $ANDROID_HOME/build-tools/*/ | sort -V | tail -1)aapt2
+          APK=$(ls app/build/outputs/apk/release/*.apk | head -1)
+          "$AAPT2" dump permissions "$APK" | tee perms.txt
+          if grep -qE "INTERNET|NETWORK_STATE|WIFI_STATE" perms.txt; then
+            echo "ERROR: APK requests network access but must be offline-only"; exit 1
+          fi
+          echo "OK: offline-only APK"
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: CallShield-apk
+          path: app/build/outputs/apk/release/*.apk

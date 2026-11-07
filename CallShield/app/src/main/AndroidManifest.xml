@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- CallShield works 100% offline. These lines strip any network permission
+         a library might try to add, so the app can never go online. -->
+    <uses-permission android:name="android.permission.INTERNET" tools:node="remove" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" tools:node="remove" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" tools:node="remove" />
+
+    <!-- Needed to tell your saved contacts apart from unknown callers -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <!-- Optional: lets through numbers you have called before (riders, banks, etc.) -->
+    <uses-permission android:name="android.permission.READ_CALL_LOG" />
+    <!-- Optional: "call blocked" notifications on Android 13+ -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Optional: lets the "Block as loan spam" button hang up a ringing call -->
+    <uses-permission android:name="android.permission.ANSWER_PHONE_CALLS" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.CallShield">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".NumberListActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+
+        <activity
+            android:name=".BlockedLogActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+
+        <receiver
+            android:name=".SpamActionReceiver"
+            android:exported="false" />
+
+        <!-- Android's Telecom system binds this service for each incoming call
+             once the app holds the "Caller ID & spam" (call screening) role.
+             It does not need to run in the background, so Samsung battery
+             optimisation cannot kill it. -->
+        <service
+            android:name=".CallBlockerService"
+            android:exported="true"
+            android:permission="android.permission.BIND_SCREENING_SERVICE">
+            <intent-filter>
+                <action android:name="android.telecom.CallScreeningService" />
+            </intent-filter>
+        </service>
+    </application>
+</manifest>
